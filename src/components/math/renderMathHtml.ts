@@ -40,16 +40,19 @@ const HEIGHT_SCRIPT = `
   post();
 })();`;
 
-/** A complete, self-contained HTML document for the given segments. No external URLs. */
-export function renderMathHtml(segments: Segment[], opts: MathHtmlOptions = {}): string {
+/** KaTeX HTML for the segments, without the page around it (small; safe to cache). */
+export function renderMathBody(segments: Segment[]): string {
+  try {
+    return segments.map(renderSegment).join('');
+  } catch {
+    return escapeHtml(segments.map((s) => s.value).join(''));
+  }
+}
+
+/** Wraps a rendered body in a complete page with the inlined KaTeX CSS and fonts. */
+export function wrapMathPage(body: string, opts: MathHtmlOptions = {}): string {
   const color = opts.color ?? '#111';
   const fontSize = opts.fontSize ?? 16;
-  let body: string;
-  try {
-    body = segments.map(renderSegment).join('');
-  } catch {
-    body = escapeHtml(segments.map((s) => s.value).join(''));
-  }
   return `<!DOCTYPE html><html><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <style>${KATEX_CSS}
@@ -57,4 +60,9 @@ html,body{margin:0;padding:0;background:transparent;}
 #c{color:${color};font-size:${fontSize}px;font-family:-apple-system,system-ui,sans-serif;line-height:1.4;overflow-wrap:anywhere;}
 .katex-display{overflow-x:auto;overflow-y:hidden;margin:0.4em 0;}
 </style></head><body><div id="c">${body}</div><script>${HEIGHT_SCRIPT}</script></body></html>`;
+}
+
+/** A complete, self-contained HTML document for the given segments. No external URLs. */
+export function renderMathHtml(segments: Segment[], opts: MathHtmlOptions = {}): string {
+  return wrapMathPage(renderMathBody(segments), opts);
 }

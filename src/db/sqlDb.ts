@@ -4,4 +4,5 @@ export interface SqlDb {
   getAll<T>(sql: string, params?: unknown[]): Promise<T[]>;
   getFirst<T>(sql: string, params?: unknown[]): Promise<T | null>;
   transaction<T>(fn: () => Promise<T>): Promise<T>;
+  close(): Promise<void>;
 }

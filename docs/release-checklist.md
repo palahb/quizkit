@@ -6,7 +6,7 @@ Run this on a real iPhone before each release. Tick each line and note the date.
 
 | Check | Command | Result |
 |---|---|---|
-| Unit and component tests | `npx jest` | 2026-10-27: 194/194 pass |
+| Unit and component tests | `npx jest` | 2026-10-27: 204/204 pass |
 | Type check | `npx tsc --noEmit` | 2026-10-27: clean |
 | iOS bundle builds | `npx expo export --platform ios` | 2026-10-27: ok |
 | Dependency health | `npx expo-doctor` | 2026-10-27: 20/20 |

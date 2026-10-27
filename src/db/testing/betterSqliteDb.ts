@@ -17,6 +17,9 @@ export function createBetterSqliteDb(): SqlDb {
     async getFirst<T>(sql: string, params: unknown[] = []) {
       return (db.prepare(sql).get(...(params as never[])) as T | undefined) ?? null;
     },
+    async close() {
+      db.close();
+    },
     async transaction(fn) {
       db.exec('BEGIN');
       try {

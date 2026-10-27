@@ -7,6 +7,7 @@ import { createAttemptRepo } from '@/db/attemptRepo';
 import { openExpoDb } from '@/db/expoSqlDb';
 import { createLibraryRepo } from '@/db/libraryRepo';
 import { migrate } from '@/db/migrations';
+import { openMigrated } from '@/db/openDatabase';
 import { createSessionRepo } from '@/db/sessionRepo';
 import type { SqlDb } from '@/db/sqlDb';
 import { languageFromLocale } from '@/i18n';
@@ -48,8 +49,7 @@ export function deviceLanguage(): Language {
 /** Opens the database, runs migrations and hydrates every store. Call once from the root layout. */
 export async function initStores(): Promise<Stores> {
   if (stores) return stores;
-  const db = await openExpoDb(DB_NAME);
-  await migrate(db);
+  const db = await openMigrated(() => openExpoDb(DB_NAME), migrate);
   const s = buildStores(db, deviceLanguage());
   await Promise.all([s.settings.getState().hydrate(), s.library.getState().hydrate(), s.session.getState().hydrate()]);
   stores = s;
@@ -72,6 +72,7 @@ export async function deleteAllData(): Promise<void> {
 
 /** Last resort when the database cannot be opened: deletes the file so the next start begins empty. */
 export async function resetDatabaseFile(): Promise<void> {
+  if (stores) await stores.db.close().catch(() => undefined);
   stores = null;
   await deleteDatabaseAsync(DB_NAME);
 }

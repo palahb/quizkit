@@ -27,6 +27,11 @@ describe('extractJson', () => {
     expect(extractJson('﻿{"questions":[]}')).toBe('{"questions":[]}');
   });
 
+  it('skips an unbalanced brace in the text before the JSON', () => {
+    const quiz = '{"title":"T","questions":[1]}';
+    expect(extractJson(`Here is a set {1, 2 as asked:\n${quiz}`)).toBe(quiz);
+  });
+
   it('returns the unterminated tail of a truncated object so the parser can report it', () => {
     expect(extractJson('{"questions":[{"question":"a"')).toBe('{"questions":[{"question":"a"');
   });
@@ -91,6 +96,20 @@ describe('restoreLatexEscapes', () => {
 
   it('keeps a real tab inside math when no LaTeX command follows', () => {
     expect(restoreLatexEscapes({ q: '$a\t+ b$' }).value).toEqual({ q: '$a\t+ b$' });
+  });
+
+  it('does not treat a price as the start of math', () => {
+    const r = restoreLatexEscapes({ q: 'Fiyat $5 idi.\ne kadar?' });
+    expect(r.value).toEqual({ q: 'Fiyat $5 idi.\ne kadar?' });
+    expect(r.fixed).toBe(0);
+  });
+
+  it('ignores an unpaired dollar', () => {
+    expect(restoreLatexEscapes({ q: 'a $ sign\nu' }).value).toEqual({ q: 'a $ sign\nu' });
+  });
+
+  it('still restores math that follows a price', () => {
+    expect(restoreLatexEscapes({ q: 'Pay $5 then $a \neq b$' }).value).toEqual({ q: 'Pay $5 then $a \\neq b$' });
   });
 
   it('walks nested arrays and objects', () => {

@@ -6,7 +6,7 @@ import { fireEvent, render, screen } from '@testing-library/react-native';
 import { translate } from '@/i18n';
 import type { Question } from '@/domain/types';
 
-import { submitMessage, unansweredCount } from '../examModel';
+import { needsSubmitConfirm, submitMessage, unansweredCount } from '../examModel';
 import { QuestionView } from '../QuestionView';
 
 const question: Question = {
@@ -47,5 +47,17 @@ describe('submit confirmation', () => {
   });
   it('says when everything is answered', () => {
     expect(submitMessage(en, 0)).toBe('All questions are answered.');
+  });
+});
+
+describe('needsSubmitConfirm', () => {
+  it('always confirms in exam mode', () => {
+    expect(needsSubmitConfirm('exam', 0)).toBe(true);
+  });
+  it('confirms in practice mode when questions are unanswered (e.g. a double tap landed on Finish)', () => {
+    expect(needsSubmitConfirm('practice', 1)).toBe(true);
+  });
+  it('finishes practice directly when everything is answered', () => {
+    expect(needsSubmitConfirm('practice', 0)).toBe(false);
   });
 });

@@ -42,9 +42,17 @@ export function extractJson(raw: string): string | null {
   let i = s.indexOf('{');
   while (i !== -1) {
     const end = scanObject(s, i);
-    const candidate = end === -1 ? s.slice(i).trimEnd() : s.slice(i, end);
+    if (end === -1) {
+      // This brace never closes. It may be a stray "{" in text before the JSON, so look for
+      // a complete quiz object further on before reporting the tail as truncated.
+      const later = s.indexOf('{', i + 1);
+      const rest = later === -1 ? null : extractJson(s.slice(later));
+      if (rest !== null && rest.includes('"questions"') && scanObject(rest, 0) !== -1) return rest;
+      const tail = s.slice(i).trimEnd();
+      return tail.includes('"questions"') ? tail : (rest ?? firstComplete);
+    }
+    const candidate = s.slice(i, end);
     if (candidate.includes('"questions"')) return candidate;
-    if (end === -1) break;
     if (firstComplete === null) firstComplete = candidate;
     i = s.indexOf('{', end);
   }
@@ -109,10 +117,36 @@ const CONTROL_TO_LETTER: Record<string, { letter: string; commands: Set<string> 
   '\r': { letter: 'r', commands: LATEX_AFTER_R },
 };
 
+/**
+ * Index ranges [start, end) inside `$...$` / `$$...$$`, paired the way segment() pairs them
+ * for prices: a single `$` directly followed by a digit is a price, not a delimiter, and an
+ * unpaired delimiter opens nothing. (Whitespace after `$` is allowed here, because the
+ * control characters being repaired are themselves whitespace.)
+ */
+function mathRanges(s: string): [number, number][] {
+  const singles: number[] = [];
+  const doubles: number[] = [];
+  for (let i = 0; i < s.length; i++) {
+    if (s[i] !== '$' || s[i - 1] === '\\') continue;
+    if (s[i + 1] === '$') {
+      doubles.push(i);
+      i++;
+    } else if (!/[0-9]/.test(s[i + 1] ?? '')) {
+      singles.push(i);
+    }
+  }
+  const ranges: [number, number][] = [];
+  for (let k = 0; k + 1 < doubles.length; k += 2) ranges.push([doubles[k] + 2, doubles[k + 1]]);
+  for (let k = 0; k + 1 < singles.length; k += 2) ranges.push([singles[k] + 1, singles[k + 1]]);
+  return ranges;
+}
+
 function restoreString(s: string): { value: string; fixed: number } {
+  if (!/[\u0008\u000c\t\n\r]/.test(s)) return { value: s, fixed: 0 };
+  const ranges = mathRanges(s);
+  const inMath = (i: number) => ranges.some(([a, b]) => i >= a && i < b);
   let out = '';
   let fixed = 0;
-  let inMath = false;
   for (let i = 0; i < s.length; i++) {
     const c = s[i];
     if (c === '\u000c') {
@@ -125,23 +159,8 @@ function restoreString(s: string): { value: string; fixed: number } {
       fixed++;
       continue;
     }
-    if (c === '\\' && s[i + 1] === '$') {
-      out += '\\$';
-      i++;
-      continue;
-    }
-    if (c === '$') {
-      if (s[i + 1] === '$') {
-        out += '$$';
-        i++;
-      } else {
-        out += '$';
-      }
-      inMath = !inMath;
-      continue;
-    }
     const ctrl = CONTROL_TO_LETTER[c];
-    if (ctrl && inMath) {
+    if (ctrl && inMath(i)) {
       const word = /^[a-zA-Z]*/.exec(s.slice(i + 1))![0];
       if (ctrl.commands.has(ctrl.letter + word)) {
         out += '\\' + ctrl.letter;

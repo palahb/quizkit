@@ -6,8 +6,16 @@ type Params = SQLite.SQLiteBindParams;
 
 export async function openExpoDb(name = 'quizkit.db'): Promise<SqlDb> {
   const db = await SQLite.openDatabaseAsync(name);
-  await db.execAsync('PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON;');
+  try {
+    await db.execAsync('PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON;');
+  } catch (e) {
+    // A corrupted file often opens fine and fails on the first statement. Close it so
+    // "Reset app data" can delete it.
+    await db.closeAsync().catch(() => undefined);
+    throw e;
+  }
   return {
+    close: () => db.closeAsync(),
     async run(sql, params = []) {
       if (params.length === 0) await db.execAsync(sql);
       else await db.runAsync(sql, params as Params);

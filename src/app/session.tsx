@@ -9,7 +9,7 @@ import { SessionHeader } from '@/components/SessionHeader';
 import { Button, T } from '@/components/ui';
 import { formatDuration } from '@/domain/format';
 import { confirmAsync, showError } from '@/features/library/flows';
-import { submitMessage, unansweredCount } from '@/features/session/examModel';
+import { needsSubmitConfirm, submitMessage, unansweredCount } from '@/features/session/examModel';
 import { QuestionView } from '@/features/session/QuestionView';
 import { useAppStateClock } from '@/hooks/useAppStateClock';
 import { useBackGuard } from '@/hooks/useBackGuard';
@@ -68,12 +68,13 @@ export default function SessionScreen() {
   const isExam = session.mode === 'exam';
 
   const finish = async () => {
-    if (isExam) {
-      const unanswered = unansweredCount(
-        questions.map((q) => q.id),
-        session.answers,
-      );
-      const ok = await confirmAsync(t('session.submitTitle'), submitMessage(t, unanswered), t('session.submit'), t, false);
+    const unanswered = unansweredCount(
+      questions.map((q) => q.id),
+      session.answers,
+    );
+    if (needsSubmitConfirm(session.mode, unanswered)) {
+      const title = isExam ? t('session.submitTitle') : t('session.finish');
+      const ok = await confirmAsync(title, submitMessage(t, unanswered), isExam ? t('session.submit') : t('session.finish'), t, false);
       if (!ok) return;
     }
     setSubmitting(true);

@@ -5,7 +5,7 @@ import { render, screen } from '@testing-library/react-native';
 import { PixelRatio } from 'react-native';
 
 import * as renderer from '../math/renderMathHtml';
-import { MathText } from '../math/MathText';
+import { mathCacheSize, MathText } from '../math/MathText';
 
 afterEach(() => jest.restoreAllMocks());
 
@@ -27,7 +27,7 @@ describe('MathText', () => {
   });
 
   it('falls back to the raw text when rendering throws', async () => {
-    jest.spyOn(renderer, 'renderMathHtml').mockImplementation(() => {
+    jest.spyOn(renderer, 'renderMathBody').mockImplementation(() => {
       throw new Error('boom');
     });
     const broken = String.raw`Broken $\frac{x}$ math`;
@@ -44,8 +44,13 @@ describe('MathText', () => {
 
   it('scales math with the system text size', async () => {
     jest.spyOn(PixelRatio, 'getFontScale').mockReturnValue(1.5);
-    const spy = jest.spyOn(renderer, 'renderMathHtml');
+    const spy = jest.spyOn(renderer, 'wrapMathPage');
     await render(<MathText text="Scaled $y^3$" />);
     expect(spy).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ fontSize: 24 }));
+  });
+
+  it('keeps the rendered-math cache small (no per-entry copy of the font CSS)', async () => {
+    for (let i = 0; i < 60; i++) await render(<MathText text={`Item ${i}: $x^{${i}}$`} />);
+    expect(mathCacheSize()).toBeLessThan(2_000_000);
   });
 });

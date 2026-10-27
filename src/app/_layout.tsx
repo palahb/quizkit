@@ -51,7 +51,12 @@ function LoadError({ onRetry }: { onRetry: () => void }) {
         text: tr('app.resetData'),
         style: 'destructive',
         onPress: async () => {
-          await resetDatabaseFile().catch(() => undefined);
+          try {
+            await resetDatabaseFile();
+          } catch (e) {
+            Alert.alert(tr('app.loadError'), e instanceof Error ? e.message : String(e));
+            return;
+          }
           onRetry();
         },
       },
