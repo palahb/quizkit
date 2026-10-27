@@ -120,7 +120,9 @@ export function Row({
   onPress,
   onLongPress,
   accessibilityLabel,
+  testID,
 }: {
+  testID?: string;
   title: string;
   subtitle?: string;
   left?: ReactNode;
@@ -132,6 +134,7 @@ export function Row({
   const t = useTheme();
   return (
     <Pressable
+      testID={testID}
       accessibilityRole={onPress ? 'button' : undefined}
       accessibilityLabel={accessibilityLabel}
       onPress={onPress}

@@ -21,6 +21,12 @@ function AppStack() {
     >
       <Stack screenOptions={{ headerBackTitle: t('common.back') }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="import" options={{ presentation: 'modal', title: t('import.title') }} />
+        <Stack.Screen name="move" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="start" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="session" options={{ presentation: 'fullScreenModal', headerShown: false, gestureEnabled: false }} />
+        <Stack.Screen name="results/[attemptId]" options={{ title: t('results.title'), headerBackVisible: false, gestureEnabled: false }} />
+        <Stack.Screen name="review/[attemptId]" options={{ title: t('review.title') }} />
       </Stack>
     </ThemeProvider>
   );

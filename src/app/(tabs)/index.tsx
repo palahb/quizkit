@@ -1,12 +1,5 @@
-import { Screen, T } from '@/components/ui';
-import { useT } from '@/hooks/useT';
+import { LibraryBrowser } from '@/features/library/LibraryBrowser';
 
-// Placeholder until Task 11 builds the library.
 export default function LibraryScreen() {
-  const t = useT();
-  return (
-    <Screen>
-      <T variant="muted">{t('library.empty')}</T>
-    </Screen>
-  );
+  return <LibraryBrowser parentId={null} />;
 }
