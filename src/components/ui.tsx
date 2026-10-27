@@ -19,7 +19,13 @@ export function Screen({
   return (
     <SafeAreaView edges={edges} style={{ flex: 1, backgroundColor: t.bg }}>
       {scroll ? (
-        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+        // "automatic" lets iOS push content below a transparent (iOS 26 Liquid Glass) title bar.
+        <ScrollView
+          testID="screen-scroll"
+          contentInsetAdjustmentBehavior="automatic"
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+        >
           {children}
         </ScrollView>
       ) : (
