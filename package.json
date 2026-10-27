@@ -57,7 +57,8 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "test": "jest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build:katex": "tsx scripts/build-katex-assets.ts"
   },
   "private": true
 }
