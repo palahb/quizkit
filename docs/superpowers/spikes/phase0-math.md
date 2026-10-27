@@ -1,6 +1,6 @@
 # Phase 0 math spike — results
 
-Status: **PENDING owner test on iPhone** (no iOS simulator on the dev machine).
+Status: **PASSED** — tested by the owner on their iPhone via Expo Go (2026-10-27).
 
 Setup: one WebView per math-bearing string (stem, each option, explanation); plain strings are native `<Text>`.
 KaTeX HTML is rendered in JS; the WebView gets a static page with CSS and base64 woff2 fonts (360 KB CSS) and no external URLs.
@@ -13,10 +13,10 @@ KaTeX HTML is rendered in JS; the WebView gets a static page with CSS and base64
 ## Criteria (spec §5.4)
 | Check | Result |
 |---|---|
-| Math appears with airplane mode on | |
-| Blank/flicker on first paint (rough ms) | |
-| Flicker when pressing Next 20 times | |
-| Option taps stay responsive | |
+| Math appears with airplane mode on | pass (owner: "everything seems ok, no math problem") |
+| Blank/flicker on first paint (rough ms) | none reported |
+| Flicker when pressing Next 20 times | none reported |
+| Option taps stay responsive | pass |
 
 ## Decision
-_pending_
+Keep the WebView + KaTeX approach, one WebView per math-bearing string (stem, each option, explanation). Plain strings stay native `<Text>`. The MathJax/SVG fallback is not needed.
