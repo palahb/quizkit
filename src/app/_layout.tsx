@@ -1,7 +1,8 @@
-import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
+import { DarkTheme, DefaultTheme, router, Stack, ThemeProvider } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, View } from 'react-native';
 
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Button, Screen, T } from '@/components/ui';
 import { translate } from '@/i18n';
 import { deviceLanguage, initStores, resetDatabaseFile } from '@/stores';
@@ -19,15 +20,22 @@ function AppStack() {
         colors: { ...navTheme.colors, background: theme.bg, card: theme.surface, text: theme.text, border: theme.border, primary: theme.primary },
       }}
     >
-      <Stack screenOptions={{ headerBackTitle: t('common.back') }}>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="import" options={{ presentation: 'modal', title: t('import.title') }} />
-        <Stack.Screen name="move" options={{ presentation: 'modal' }} />
-        <Stack.Screen name="start" options={{ presentation: 'modal' }} />
-        <Stack.Screen name="session" options={{ presentation: 'fullScreenModal', headerShown: false, gestureEnabled: false }} />
-        <Stack.Screen name="results/[attemptId]" options={{ title: t('results.title'), headerBackVisible: false, gestureEnabled: false }} />
-        <Stack.Screen name="review/[attemptId]" options={{ title: t('review.title') }} />
-      </Stack>
+      <ErrorBoundary
+        onReset={() => {
+          if (router.canDismiss()) router.dismissAll();
+          router.replace('/');
+        }}
+      >
+        <Stack screenOptions={{ headerBackTitle: t('common.back') }}>
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="import" options={{ presentation: 'modal', title: t('import.title') }} />
+          <Stack.Screen name="move" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="start" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="session" options={{ presentation: 'fullScreenModal', headerShown: false, gestureEnabled: false }} />
+          <Stack.Screen name="results/[attemptId]" options={{ title: t('results.title'), headerBackVisible: false, gestureEnabled: false }} />
+          <Stack.Screen name="review/[attemptId]" options={{ title: t('review.title') }} />
+        </Stack>
+      </ErrorBoundary>
     </ThemeProvider>
   );
 }

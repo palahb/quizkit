@@ -11,6 +11,8 @@ import { formatDuration } from '@/domain/format';
 import { confirmAsync, showError } from '@/features/library/flows';
 import { submitMessage, unansweredCount } from '@/features/session/examModel';
 import { QuestionView } from '@/features/session/QuestionView';
+import { useAppStateClock } from '@/hooks/useAppStateClock';
+import { useBackGuard } from '@/hooks/useBackGuard';
 import { useElapsed } from '@/hooks/useElapsed';
 import { useT } from '@/hooks/useT';
 import { useSessionStore } from '@/stores';
@@ -27,6 +29,9 @@ export default function SessionScreen() {
   const [gridOpen, setGridOpen] = useState(false);
   const elapsed = useElapsed(session);
 
+  // The stopwatch only counts while the app is on screen.
+  useAppStateClock(store.pause, store.resumeClock);
+
   // Entering the screen (fresh start or "Resume") loads questions if needed and starts the clock.
   useEffect(() => {
     store.resume().then((ok) => {
@@ -37,6 +42,14 @@ export default function SessionScreen() {
     }, showError);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const quit = async () => {
+    if (await confirmAsync(t('session.leaveTitle'), t('session.leaveBody'), t('session.leave'), t, false)) {
+      store.pause();
+      router.back();
+    }
+  };
+  useBackGuard(true, quit);
 
   if (!session || !questions) {
     return (
@@ -51,12 +64,6 @@ export default function SessionScreen() {
   const next = questions[index + 1];
   const isLast = index === questions.length - 1;
 
-  const quit = async () => {
-    if (await confirmAsync(t('session.leaveTitle'), t('session.leaveBody'), t('session.leave'), t, false)) {
-      store.pause();
-      router.back();
-    }
-  };
 
   const isExam = session.mode === 'exam';
 
