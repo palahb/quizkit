@@ -1,4 +1,5 @@
 import '@/test/mockUi';
+import '@/test/mockWebView';
 
 import { fireEvent, render, screen } from '@testing-library/react-native';
 
@@ -64,5 +65,11 @@ describe('ImportPanel', () => {
     await render(<ImportPanel {...props({ result })} />);
     expect(screen.getByText('T')).toBeTruthy();
     expect(screen.getByText('2 questions')).toBeTruthy();
+  });
+
+  it('renders math in the first-question preview', async () => {
+    const result = parseQuizJson(goodQuiz([q({ question: 'What is $x^2$?' })]));
+    await render(<ImportPanel {...props({ result })} />);
+    expect(screen.getByTestId('math-webview')).toBeTruthy();
   });
 });

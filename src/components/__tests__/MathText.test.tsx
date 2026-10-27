@@ -2,6 +2,7 @@ import '@/test/mockUi';
 import '@/test/mockWebView';
 
 import { render, screen } from '@testing-library/react-native';
+import { PixelRatio } from 'react-native';
 
 import * as renderer from '../math/renderMathHtml';
 import { MathText } from '../math/MathText';
@@ -39,5 +40,12 @@ describe('MathText', () => {
     const long = 'word '.repeat(2000);
     await render(<MathText text={long} />);
     expect(screen.getByText(long)).toBeTruthy();
+  });
+
+  it('scales math with the system text size', async () => {
+    jest.spyOn(PixelRatio, 'getFontScale').mockReturnValue(1.5);
+    const spy = jest.spyOn(renderer, 'renderMathHtml');
+    await render(<MathText text="Scaled $y^3$" />);
+    expect(spy).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ fontSize: 24 }));
   });
 });

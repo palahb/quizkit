@@ -1,5 +1,5 @@
 import { memo, useMemo, useState } from 'react';
-import { Text, type TextStyle } from 'react-native';
+import { PixelRatio, Text, type TextStyle } from 'react-native';
 import { WebView } from 'react-native-webview';
 
 import { hashString } from '@/domain/hash';
@@ -27,25 +27,27 @@ function remember<V>(map: Map<string, V>, key: string, value: V) {
 export const MathText = memo(function MathText({ text, fontSize = 16, color }: { text: string; fontSize?: number; color?: string }) {
   const theme = useTheme();
   const textColor = color ?? theme.text;
-  const style: TextStyle = { fontSize, color: textColor, lineHeight: Math.round(fontSize * 1.4) };
+  const style: TextStyle = { fontSize, color: textColor };
+  // Native text follows the system text size on its own; the WebView needs it applied by hand.
+  const mathSize = Math.round(fontSize * PixelRatio.getFontScale());
 
   const page = useMemo(() => {
     const { segments } = segment(text);
     if (!hasMath(segments)) return null;
-    const key = hashString(`${textColor}|${fontSize}|${text}`);
+    const key = hashString(`${textColor}|${mathSize}|${text}`);
     let html = htmlCache.get(key);
     if (html === undefined) {
       try {
-        html = renderMathHtml(segments, { color: textColor, fontSize });
+        html = renderMathHtml(segments, { color: textColor, fontSize: mathSize });
       } catch {
         return null;
       }
       remember(htmlCache, key, html);
     }
     return { key, html };
-  }, [text, textColor, fontSize]);
+  }, [text, textColor, mathSize]);
 
-  const [height, setHeight] = useState(() => (page ? (heightCache.get(page.key) ?? Math.round(fontSize * 1.6)) : 0));
+  const [height, setHeight] = useState(() => (page ? (heightCache.get(page.key) ?? Math.round(mathSize * 1.6)) : 0));
 
   if (!page) return <Text style={style}>{text}</Text>;
   return (

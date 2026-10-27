@@ -1,6 +1,7 @@
 import { TextInput, View } from 'react-native';
 
 import { ImportIssuesList } from '@/components/ImportIssuesList';
+import { MathText } from '@/components/math/MathText';
 import { Button, Card, Row, T } from '@/components/ui';
 import type { ImportResult } from '@/domain/types';
 import { useT } from '@/hooks/useT';
@@ -81,7 +82,7 @@ export function ImportPanel(p: ImportPanelProps) {
             <T variant="small" style={{ marginTop: 6 }}>
               {t('import.firstQuestion')}
             </T>
-            <T>{r.quiz.questions[0].text}</T>
+            <MathText text={r.quiz.questions[0].text} />
           </Card>
           {r.warnings.length > 0 ? (
             <Card style={{ gap: 10 }}>
