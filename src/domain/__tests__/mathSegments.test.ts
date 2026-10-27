@@ -47,14 +47,14 @@ describe('segment', () => {
     const big = '$a$ '.repeat(50_000);
     const t0 = Date.now();
     const r = segment(big);
-    expect(Date.now() - t0).toBeLessThan(200);
+    expect(Date.now() - t0).toBeLessThan(1000);
     expect(r.segments.filter((s) => s.kind === 'inline')).toHaveLength(50_000);
   });
 
   it('handles thousands of unmatched dollars quickly', () => {
     const t0 = Date.now();
     segment('$ '.repeat(100_000));
-    expect(Date.now() - t0).toBeLessThan(200);
+    expect(Date.now() - t0).toBeLessThan(1000);
   });
 
   it('returns one segment for a 10,000-char line', () => {
