@@ -23,4 +23,8 @@ describe('buildLlmPrompt', () => {
     expect(prompt).toMatch(/only the JSON/i);
     expect(prompt).toMatch(/same language/i);
   });
+
+  it('tells the AI to use typographic quotes inside text', () => {
+    expect(prompt).toContain('“ ”');
+  });
 });

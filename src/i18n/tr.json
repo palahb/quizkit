@@ -108,13 +108,16 @@
       "option_empty": "Soru {question}: {option}. şık boş.",
       "answer_invalid": "Soru {question}: \"answer\" A–F arası bir harf olmalı (\"{answer}\" bulundu).",
       "answer_out_of_range": "Soru {question}: cevap “{answer}” ama yalnızca {optionCount} şık var.",
-      "duplicate_id": "Soru {question}: “{id}” kimliği iki kez kullanılmış."
+      "duplicate_id": "Soru {question}: “{id}” kimliği iki kez kullanılmış.",
+      "syntax_in_question": "Soru {question}, \"{field}\" alanı: JSON'da {line}. satır, {column}. sütunda bir hata var."
     },
     "hint": {
       "trailing_comma": "Kapanış parantezinden önce fazladan bir virgül var.",
       "missing_quote": "Bir tırnak işareti eksik görünüyor.",
       "truncated": "Metin erken bitiyor. Yapay zekâ muhtemelen cevabın ortasında durdu: devam etmesini ya da JSON'un tamamını tekrar göndermesini iste.",
-      "unknown": "JSON'u bu noktanın çevresinde kontrol et."
+      "unknown": "JSON'u bu noktanın çevresinde kontrol et.",
+      "inner_quote": "Metnin içindeki bir tırnak işareti metni erken bitiriyor. \" yerine “ ” kullan.",
+      "missing_comma": "İki öğe arasında bir virgül eksik."
     },
     "warning": {
       "odd_dollar": "Soru {question}: {field} eşi olmayan bir $ var, düz metin olarak gösterilecek.",
@@ -122,7 +125,8 @@
       "duplicate_option": "Soru {question}: iki şık birebir aynı.",
       "duplicate_question": "Soru {question} daha önceki bir sorunun tekrarı.",
       "images_unsupported": "{count} soruda görsel vardı. Görseller henüz desteklenmiyor ve dahil edilmedi.",
-      "backslashes_repaired": "Yapay zekânın çift yazmayı unuttuğu {count} LaTeX ters eğik çizgisini düzelttik."
+      "backslashes_repaired": "Yapay zekânın çift yazmayı unuttuğu {count} LaTeX ters eğik çizgisini düzelttik.",
+      "quotes_repaired": "Testin okunabilmesi için metinlerin içindeki {count} tırnak işaretini “ ” yaptık."
     }
   },
   "session": {

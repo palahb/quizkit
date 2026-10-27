@@ -108,13 +108,16 @@
       "option_empty": "Question {question}: option {option} is empty.",
       "answer_invalid": "Question {question}: \"answer\" must be a letter A–F (found \"{answer}\").",
       "answer_out_of_range": "Question {question}: the answer is “{answer}” but there are only {optionCount} options.",
-      "duplicate_id": "Question {question}: the id “{id}” is used twice."
+      "duplicate_id": "Question {question}: the id “{id}” is used twice.",
+      "syntax_in_question": "Question {question}, field \"{field}\": the JSON has a mistake at line {line}, column {column}."
     },
     "hint": {
       "trailing_comma": "There is an extra comma before a closing bracket.",
       "missing_quote": "A quotation mark seems to be missing.",
       "truncated": "The text ends too early. The AI probably stopped mid-answer: ask it to continue, or to send the whole JSON again.",
-      "unknown": "Check the JSON around this spot."
+      "unknown": "Check the JSON around this spot.",
+      "inner_quote": "A quotation mark inside the text ends it too early. Write it as “ ” instead of \".",
+      "missing_comma": "A comma is missing between two items."
     },
     "warning": {
       "odd_dollar": "Question {question}: a $ in the {field} has no partner, so it is shown as plain text.",
@@ -122,7 +125,8 @@
       "duplicate_option": "Question {question}: two options are identical.",
       "duplicate_question": "Question {question} repeats an earlier question.",
       "images_unsupported": "{count} questions had images. Images aren't supported yet and were left out.",
-      "backslashes_repaired": "We fixed {count} LaTeX backslashes the AI forgot to double."
+      "backslashes_repaired": "We fixed {count} LaTeX backslashes the AI forgot to double.",
+      "quotes_repaired": "We turned {count} quotation marks inside texts into “ ” so the quiz could be read."
     }
   },
   "session": {

@@ -190,3 +190,32 @@ describe('parseQuizJson: repairs and warnings', () => {
     expect(ok(parseQuizJson(quiz([q()]))).warnings).toEqual([]);
   });
 });
+
+describe('parseQuizJson: quotation marks inside text and error positions', () => {
+  const lines = [
+    '{',
+    '"schemaVersion": 1,',
+    '"title": "Uluslararası İşletmecilik",',
+    '"questions": [',
+    '{"question": "Birinci?", "options": ["a", "b"], "answer": "A"},',
+    '{"question": ""Örgütün attığı adımlar" olarak tanımlanan kavram?", "options": ["Strateji", "Misyon"], "answer": "A"}',
+    ']',
+    '}',
+  ];
+
+  it('repairs quotation marks inside a question and warns', () => {
+    const r = ok(parseQuizJson(lines.join('\n')));
+    expect(r.quiz.questions[1].text).toBe('“Örgütün attığı adımlar” olarak tanımlanan kavram?');
+    expect(r.warnings).toContainEqual({ code: 'quotes_repaired', params: { count: 2 } });
+  });
+
+  it('reports the real line, question and field of an error it cannot repair', () => {
+    const broken = [...lines];
+    broken[5] = '{"question": "İkinci?", "options" ["a", "b"], "answer": "A"}';
+    const r = fail(parseQuizJson('Here is your quiz:\n' + broken.join('\n')));
+    expect(r.kind).toBe('syntax');
+    expect(r.issues[0].code).toBe('syntax_in_question');
+    expect(r.issues[0].params).toMatchObject({ line: 7, question: 2, field: 'options' });
+    expect(String(r.issues[0].params.snippet)).toContain('"options" ["a"');
+  });
+});

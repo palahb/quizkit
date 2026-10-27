@@ -97,4 +97,11 @@ describe('ImportPanel', () => {
     await fireEvent(screen.getByTestId('import-result'), 'layout', { nativeEvent: { layout: { x: 0, y: 420, width: 300, height: 100 } } });
     expect(onResultLayout).toHaveBeenCalledWith(420);
   });
+
+  it('shows the question, field, line and the faulty text for an error inside a question', async () => {
+    const raw = ['{"schemaVersion": 1, "title": "T", "questions": [', '{"question": "Q?", "options" ["a", "b"], "answer": "A"}', ']}'].join('\n');
+    await render(<ImportPanel {...props({ result: parseQuizJson(raw) })} />);
+    expect(screen.getByText('Question 1, field "options": the JSON has a mistake at line 2, column 30.')).toBeTruthy();
+    expect(screen.getByText(/"options" \["a", "b"\]/)).toBeTruthy();
+  });
 });

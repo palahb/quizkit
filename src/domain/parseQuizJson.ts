@@ -16,6 +16,7 @@ import {
   tagsSchema,
   titleSchema,
 } from './importSchema';
+import { errorContext, findJsonError, repairInnerQuotes } from './jsonDiagnostics';
 import { segment } from './mathSegments';
 import { extractJson, repairBackslashes, restoreLatexEscapes } from './normalizeInput';
 import type { ImportFailureKind, ImportIssue, ImportResult, ImportWarning, Question } from './types';
@@ -53,6 +54,29 @@ function isTruncated(json: string): boolean {
     else if (c === '}' || c === ']') depth--;
   }
   return inString || depth > 0;
+}
+
+/**
+ * Finds the error ourselves and reports it in terms of what the user pasted: line and column
+ * in the original text, the question number and field, and the offending line.
+ */
+function locatedSyntaxIssue(raw: string, extracted: string): ImportIssue | null {
+  const err = findJsonError(extracted);
+  if (!err) return null;
+  const text = raw.replace(/^\uFEFF/, '');
+  const offset = Math.max(0, text.indexOf(extracted));
+  const { line, column } = lineCol(text, offset + err.index);
+  const lineText = text.split('\n')[line - 1] ?? '';
+  const from = Math.max(0, column - 1 - 30);
+  const snippet = `${from > 0 ? '…' : ''}${lineText.slice(from, column - 1 + 30)}${column - 1 + 30 < lineText.length ? '…' : ''}`;
+  const ctx = errorContext(extracted, err.index);
+  const params: ImportIssue['params'] = { line, column, snippet, hint: err.hint };
+  if (ctx.question !== undefined) {
+    params.question = ctx.question;
+    params.field = ctx.field ?? '';
+    return { code: 'syntax_in_question', params };
+  }
+  return { code: 'syntax', params };
 }
 
 function syntaxIssue(json: string, error: unknown): ImportIssue {
@@ -173,10 +197,19 @@ export function parseQuizJson(raw: string): ImportResult {
 
   const repaired = repairBackslashes(extracted);
   let parsed: unknown;
+  let quotesFixed = 0;
   try {
     parsed = JSON.parse(repaired.json);
   } catch (e) {
-    return failure('syntax', [syntaxIssue(repaired.json, e)]);
+    // Second chance: quotation marks the AI forgot to escape inside a text.
+    const requoted = repairInnerQuotes(repaired.json);
+    try {
+      if (requoted.fixed === 0) throw e;
+      parsed = JSON.parse(requoted.json);
+      quotesFixed = requoted.fixed;
+    } catch {
+      return failure('syntax', [locatedSyntaxIssue(raw, extracted) ?? syntaxIssue(repaired.json, e)]);
+    }
   }
   if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
     return failure('wrong-shape', [{ code: 'wrong_shape', params: {} }]);
@@ -204,6 +237,7 @@ export function parseQuizJson(raw: string): ImportResult {
   const warnings: ImportWarning[] = [];
   const fixedCount = repaired.fixed + restored.fixed;
   if (fixedCount > 0) warnings.push({ code: 'backslashes_repaired', params: { count: fixedCount } });
+  if (quotesFixed > 0) warnings.push({ code: 'quotes_repaired', params: { count: quotesFixed } });
 
   const imageCount = questionsArr.data.filter(
     (q) => q !== null && typeof q === 'object' && ('image' in q || 'images' in q),

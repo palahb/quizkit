@@ -32,6 +32,7 @@ ${EXAMPLE}
 - Write the questions, options and explanations in the same language as my material.
 - If the material contains real exam questions, keep them word for word and in order.
 - Math: use LaTeX inside $...$ (inline) or $$...$$ (on its own line). Inside JSON strings, double every backslash: write \\\\frac, \\\\sqrt, \\\\int, never \\frac.
+- If a text needs quotation marks (for example a quoted definition), use “ ” instead of ", because a plain " inside a JSON string breaks the file.
 - Do not use Markdown, HTML or images. Describe any figure in words if it is needed.
 - If the material is long, include every question; do not stop early.
 

@@ -14,13 +14,14 @@ export function ImportIssuesList({ items, kind }: { items: ImportIssue[]; kind: 
     <View style={{ gap: 8 }}>
       {items.map((item, i) => {
         const params = { ...item.params };
-        if (typeof params.field === 'string') params.field = t(`import.field.${params.field}`);
+        // Warnings name a part of a question in words; syntax errors name the JSON key as written.
+        if (kind === 'warning' && typeof params.field === 'string') params.field = t(`import.field.${params.field}`);
         const hint = typeof item.params.hint === 'string' ? t(`import.hint.${item.params.hint}`) : null;
         return (
           <View key={i} style={{ gap: 4 }}>
             <T style={{ color: kind === 'issue' ? theme.wrong : theme.text }}>{t(`import.${kind}.${item.code}`, params)}</T>
             {hint ? <T variant="muted">{hint}</T> : null}
-            {item.code === 'syntax' && item.params.snippet ? (
+            {(item.code === 'syntax' || item.code === 'syntax_in_question') && item.params.snippet ? (
               <T variant="small" style={{ fontFamily: 'Menlo' }}>
                 {String(item.params.snippet)}
               </T>
