@@ -1,5 +1,5 @@
 // Small themed building blocks shared by every screen.
-import type { ReactNode } from 'react';
+import type { ComponentRef, ReactNode, Ref } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View, type StyleProp, type TextProps, type ViewStyle } from 'react-native';
 import { SafeAreaView, type Edge } from 'react-native-safe-area-context';
 
@@ -10,10 +10,12 @@ export function Screen({
   children,
   scroll = true,
   edges = ['left', 'right'],
+  scrollRef,
 }: {
   children: ReactNode;
   scroll?: boolean;
   edges?: Edge[];
+  scrollRef?: Ref<ComponentRef<typeof ScrollView>>;
 }) {
   const t = useTheme();
   return (
@@ -21,8 +23,10 @@ export function Screen({
       {scroll ? (
         // "automatic" lets iOS push content below a transparent (iOS 26 Liquid Glass) title bar.
         <ScrollView
+          ref={scrollRef}
           testID="screen-scroll"
           contentInsetAdjustmentBehavior="automatic"
+          keyboardDismissMode="on-drag"
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
         >

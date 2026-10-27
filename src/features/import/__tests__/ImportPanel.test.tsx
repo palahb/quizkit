@@ -15,7 +15,7 @@ function props(over: Partial<ImportPanelProps> = {}): ImportPanelProps {
     folderLabel: 'Library (top level)',
     saving: false,
     onChangeText: noop,
-    onCheck: noop,
+    onClear: noop,
     onPaste: noop,
     onPickFile: noop,
     onCopyPrompt: noop,
@@ -71,5 +71,30 @@ describe('ImportPanel', () => {
     const result = parseQuizJson(goodQuiz([q({ question: 'What is $x^2$?' })]));
     await render(<ImportPanel {...props({ result })} />);
     expect(screen.getByTestId('math-webview')).toBeTruthy();
+  });
+
+  it('has no Check button: checking happens automatically', async () => {
+    await render(<ImportPanel {...props({ text: '{}' })} />);
+    expect(screen.queryByText('Check')).toBeNull();
+  });
+
+  it('clears the box with one tap', async () => {
+    const onClear = jest.fn();
+    await render(<ImportPanel {...props({ text: '{ broken', onClear })} />);
+    await fireEvent.press(screen.getByText('Clear'));
+    expect(onClear).toHaveBeenCalled();
+  });
+
+  it('hides Clear when the box is empty', async () => {
+    await render(<ImportPanel {...props({ text: '' })} />);
+    expect(screen.queryByText('Clear')).toBeNull();
+  });
+
+  it('reports where the result is, so the screen can scroll to it', async () => {
+    const onResultLayout = jest.fn();
+    const result = parseQuizJson('{"schemaVersion":1,"title":"T","questions":[],}');
+    await render(<ImportPanel {...props({ result, onResultLayout })} />);
+    await fireEvent(screen.getByTestId('import-result'), 'layout', { nativeEvent: { layout: { x: 0, y: 420, width: 300, height: 100 } } });
+    expect(onResultLayout).toHaveBeenCalledWith(420);
   });
 });

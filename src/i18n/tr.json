@@ -72,7 +72,7 @@
     "pickFile": ".json dosyası seç",
     "copyPrompt": "ChatGPT/Claude için istemi kopyala",
     "promptCopied": "İstem kopyalandı. Notların veya PDF'inle birlikte ChatGPT'ye ya da Claude'a yapıştır.",
-    "check": "Kontrol et",
+    "clear": "Temizle",
     "clipboardEmpty": "Pano boş.",
     "fileTooLarge": "Bu dosya içe aktarmak için çok büyük (sınır 10 MB).",
     "fileReadError": "Dosya okunamadı.",

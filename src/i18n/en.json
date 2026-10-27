@@ -72,7 +72,7 @@
     "pickFile": "Pick .json file",
     "copyPrompt": "Copy prompt for ChatGPT/Claude",
     "promptCopied": "Prompt copied. Paste it into ChatGPT or Claude together with your notes or PDF.",
-    "check": "Check",
+    "clear": "Clear",
     "clipboardEmpty": "The clipboard is empty.",
     "fileTooLarge": "This file is too big to import (limit 10 MB).",
     "fileReadError": "The file could not be read.",

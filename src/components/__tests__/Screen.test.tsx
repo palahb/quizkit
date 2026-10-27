@@ -16,4 +16,13 @@ describe('Screen', () => {
     );
     expect(screen.getByTestId('screen-scroll').props.contentInsetAdjustmentBehavior).toBe('automatic');
   });
+
+  it('closes the keyboard when the user scrolls', async () => {
+    await render(
+      <Screen>
+        <Text>content</Text>
+      </Screen>,
+    );
+    expect(screen.getByTestId('screen-scroll').props.keyboardDismissMode).toBe('on-drag');
+  });
 });

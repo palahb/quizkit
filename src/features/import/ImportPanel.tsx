@@ -1,4 +1,4 @@
-import { TextInput, View } from 'react-native';
+import { Pressable, TextInput, View } from 'react-native';
 
 import { ImportIssuesList } from '@/components/ImportIssuesList';
 import { MathText } from '@/components/math/MathText';
@@ -14,7 +14,9 @@ export interface ImportPanelProps {
   folderLabel: string;
   saving: boolean;
   onChangeText(text: string): void;
-  onCheck(): void;
+  onClear(): void;
+  /** Y position of the error list / preview inside the panel, for scrolling to it. */
+  onResultLayout?(y: number): void;
   onPaste(): void;
   onPickFile(): void;
   onCopyPrompt(): void;
@@ -38,7 +40,14 @@ export function ImportPanel(p: ImportPanelProps) {
         </View>
       </View>
 
-      <T variant="heading">{t('import.pasteLabel')}</T>
+      <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+        <T variant="heading">{t('import.pasteLabel')}</T>
+        {p.text !== '' ? (
+          <Pressable accessibilityRole="button" hitSlop={12} onPress={p.onClear}>
+            <T style={{ color: theme.primary }}>{t('import.clear')}</T>
+          </Pressable>
+        ) : null}
+      </View>
       <TextInput
         multiline
         value={p.text}
@@ -63,8 +72,7 @@ export function ImportPanel(p: ImportPanelProps) {
           fontSize: 13,
         }}
       />
-      <Button label={t('import.check')} onPress={p.onCheck} disabled={p.text.trim() === ''} />
-
+      <View testID="import-result" style={{ gap: 12 }} onLayout={(e) => p.onResultLayout?.(e.nativeEvent.layout.y)}>
       {r && !r.ok ? (
         <Card style={{ gap: 10, borderColor: theme.wrong }}>
           <T variant="heading">{t('import.errorsTitle')}</T>
@@ -94,6 +102,7 @@ export function ImportPanel(p: ImportPanelProps) {
           <Button label={t('import.save')} onPress={p.onSave} disabled={p.saving} />
         </>
       ) : null}
+      </View>
     </View>
   );
 }
