@@ -1,0 +1,68 @@
+import '@/test/mockUi';
+
+import { fireEvent, render, screen } from '@testing-library/react-native';
+
+import { parseQuizJson } from '@/domain/parseQuizJson';
+
+import { ImportPanel, type ImportPanelProps } from '../ImportPanel';
+
+const noop = () => {};
+function props(over: Partial<ImportPanelProps> = {}): ImportPanelProps {
+  return {
+    text: '',
+    result: null,
+    folderLabel: 'Library (top level)',
+    saving: false,
+    onChangeText: noop,
+    onCheck: noop,
+    onPaste: noop,
+    onPickFile: noop,
+    onCopyPrompt: noop,
+    onChooseFolder: noop,
+    onSave: noop,
+    ...over,
+  };
+}
+
+const goodQuiz = (questions: unknown[]) => JSON.stringify({ schemaVersion: 1, title: 'T', questions });
+const q = (over = {}) => ({ question: 'Q?', options: ['a', 'b'], answer: 'A', ...over });
+
+describe('ImportPanel', () => {
+  it('shows a translated message and hint for a trailing comma, not the raw code', async () => {
+    const result = parseQuizJson('{"schemaVersion":1,"title":"T","questions":[],}');
+    await render(<ImportPanel {...props({ result })} />);
+    expect(screen.getByText("We couldn't import this")).toBeTruthy();
+    expect(screen.getByText(/The JSON has a mistake at line 1/)).toBeTruthy();
+    expect(screen.getByText(/extra comma/)).toBeTruthy();
+    expect(screen.queryByText(/trailing_comma/)).toBeNull();
+  });
+
+  it('shows how many more problems there are', async () => {
+    const result = parseQuizJson(goodQuiz(Array.from({ length: 13 }, () => q({ answer: 'Z' }))));
+    await render(<ImportPanel {...props({ result })} />);
+    expect(screen.getByText('+3 more problems')).toBeTruthy();
+  });
+
+  it('shows warnings on the preview and still allows saving', async () => {
+    const onSave = jest.fn();
+    const result = parseQuizJson(goodQuiz([q({ options: ['a', 'a'] })]));
+    await render(<ImportPanel {...props({ result, onSave })} />);
+    expect(screen.getByText('Please check')).toBeTruthy();
+    expect(screen.getByText('Question 1: two options are identical.')).toBeTruthy();
+    await fireEvent.press(screen.getByText('Save quiz'));
+    expect(onSave).toHaveBeenCalled();
+  });
+
+  it('translates the field name inside warnings', async () => {
+    const result = parseQuizJson(goodQuiz([q({ question: 'costs a $ here' })]));
+    await render(<ImportPanel {...props({ result })} />);
+    expect(screen.getByText('Question 1: a $ in the question has no partner, so it is shown as plain text.')).toBeTruthy();
+  });
+
+  it('shows the title and question count for a valid quiz', async () => {
+    const result = parseQuizJson(goodQuiz([q(), q({ question: 'Second?' })]));
+    await render(<ImportPanel {...props({ result })} />);
+    expect(screen.getByText('T')).toBeTruthy();
+    expect(screen.getByText('2 questions')).toBeTruthy();
+  });
+});
