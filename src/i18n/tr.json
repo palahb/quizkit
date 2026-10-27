@@ -1,0 +1,205 @@
+{
+  "common": {
+    "cancel": "Vazgeç",
+    "save": "Kaydet",
+    "delete": "Sil",
+    "rename": "Yeniden adlandır",
+    "move": "Taşı",
+    "ok": "Tamam",
+    "back": "Geri",
+    "close": "Kapat",
+    "root": "Kütüphane (en üst)",
+    "loading": "Yükleniyor…"
+  },
+  "tabs": {
+    "library": "Kütüphane",
+    "history": "Geçmiş",
+    "settings": "Ayarlar"
+  },
+  "mode": {
+    "practice": "Alıştırma",
+    "exam": "Sınav"
+  },
+  "library": {
+    "title": "Kütüphane",
+    "empty": "Henüz test yok",
+    "emptyHint": "ChatGPT veya Claude'dan notlarını ya da çıkmış soruları teste dönüştürmesini iste. İçe aktar'a dokun, ardından tam talimatlar için “ChatGPT/Claude için istemi kopyala”yı kullan.",
+    "emptyFolder": "Bu klasör boş",
+    "newFolder": "Yeni klasör",
+    "importQuiz": "Test içe aktar",
+    "folderName": "Klasör adı",
+    "quizCount": "{n} soru",
+    "quizCount_one": "{n} soru",
+    "itemCount": "{n} öğe",
+    "itemCount_one": "{n} öğe",
+    "lastScore": "Son: {score}/{total}",
+    "playAll": "Hepsini karışık çöz",
+    "resumeTitle": "Yarım kalan test",
+    "resumeBody": "{total} sorudan {answered} tanesi cevaplandı",
+    "resume": "Devam et",
+    "discard": "Vazgeç",
+    "discardConfirm": "Yarım kalan test silinsin mi? Cevapların kaybolur.",
+    "deleteFolderConfirm": "“{name}” silinsin mi? İçindeki klasörler ve testler de silinir. Geçmişin korunur.",
+    "deleteQuizConfirm": "“{name}” silinsin mi? Geçmişin korunur.",
+    "activeSessionConfirm": "Bu, yarım kalan testinin parçası. Yine de silinsin ve o ilerleme atılsın mı?",
+    "renameFolder": "Klasörü yeniden adlandır",
+    "renameQuiz": "Testi yeniden adlandır",
+    "moveTo": "Şuraya taşı…",
+    "actions": "İşlemler"
+  },
+  "quiz": {
+    "start": "Başla",
+    "pastAttempts": "Önceki denemeler",
+    "noAttempts": "Henüz deneme yok",
+    "notFound": "Bu test artık yok."
+  },
+  "start": {
+    "title": "Başla",
+    "mode": "Mod",
+    "practiceHint": "Her sorudan hemen sonra cevabı ve açıklamayı gör.",
+    "examHint": "Cevaplar yalnızca bitirdiğinde gösterilir. Kronometre çalışır.",
+    "shuffleQuestions": "Soruları karıştır",
+    "shuffleOptions": "Şıkları karıştır",
+    "shuffleOptionsHint": "Varsayılan olarak kapalı: “A ve B” gibi şıklar sıraya bağlıdır.",
+    "go": "Başla",
+    "noQuestions": "Burada henüz soru yok."
+  },
+  "import": {
+    "title": "Test içe aktar",
+    "pasteLabel": "Test JSON'unu yapıştır",
+    "pastePlaceholder": "{ \"schemaVersion\": 1, \"title\": …, \"questions\": [ … ] }",
+    "pasteFromClipboard": "Panodan yapıştır",
+    "pickFile": ".json dosyası seç",
+    "copyPrompt": "ChatGPT/Claude için istemi kopyala",
+    "promptCopied": "İstem kopyalandı. Notların veya PDF'inle birlikte ChatGPT'ye ya da Claude'a yapıştır.",
+    "check": "Kontrol et",
+    "clipboardEmpty": "Pano boş.",
+    "fileTooLarge": "Bu dosya içe aktarmak için çok büyük (sınır 10 MB).",
+    "fileReadError": "Dosya okunamadı.",
+    "errorsTitle": "Bu içe aktarılamadı",
+    "more": "+{n} sorun daha",
+    "warningsTitle": "Lütfen kontrol et",
+    "previewTitle": "İçe aktarmaya hazır",
+    "previewCount": "{n} soru",
+    "previewCount_one": "{n} soru",
+    "firstQuestion": "İlk soru",
+    "saveTo": "Kaydedileceği yer",
+    "save": "Testi kaydet",
+    "duplicateTitle": "Zaten içe aktarılmış",
+    "duplicateBody": "Aynı sorulara sahip “{title}” zaten kütüphanende. Yine de tekrar içe aktarılsın mı?",
+    "importAnyway": "Tekrar içe aktar",
+    "field": {
+      "question": "soru metninde",
+      "option": "şıklarda",
+      "explanation": "açıklamada"
+    },
+    "issue": {
+      "empty": "İçe aktarılacak bir şey yok. Önce test JSON'unu yapıştır.",
+      "too_large": "Bu içe aktarmak için çok büyük (sınır {maxMb} MB).",
+      "not_utf8": "Bu dosya UTF-8 metin değil. UTF-8 olarak kaydedip tekrar dene.",
+      "wrong_shape": "Bu bir Quizkit testi gibi görünmüyor. \"title\" ve \"questions\" içeren tek bir JSON nesnesi olmalı.",
+      "syntax": "JSON'da {line}. satır, {column}. sütunda bir hata var.",
+      "schema_version_unsupported": "Bu test {found} sürüm biçimini kullanıyor. Uygulama 1. sürümü okur: \"schemaVersion\": 1 yap ya da uygulamayı güncelle.",
+      "title_invalid": "Testin 1–{max} karakterlik bir \"title\" alanı olmalı.",
+      "questions_count": "Bir testte 1–5000 soru olmalı ({count} bulundu).",
+      "question_text_missing": "Soru {question}: \"question\" metni eksik.",
+      "options_count": "Soru {question}: 2–6 şık olmalı ({count} bulundu).",
+      "option_not_string": "Soru {question}: {option}. şık metin olmalı.",
+      "option_empty": "Soru {question}: {option}. şık boş.",
+      "answer_invalid": "Soru {question}: \"answer\" A–F arası bir harf olmalı (\"{answer}\" bulundu).",
+      "answer_out_of_range": "Soru {question}: cevap “{answer}” ama yalnızca {optionCount} şık var.",
+      "duplicate_id": "Soru {question}: “{id}” kimliği iki kez kullanılmış."
+    },
+    "hint": {
+      "trailing_comma": "Kapanış parantezinden önce fazladan bir virgül var.",
+      "missing_quote": "Bir tırnak işareti eksik görünüyor.",
+      "truncated": "Metin erken bitiyor. Yapay zekâ muhtemelen cevabın ortasında durdu: devam etmesini ya da JSON'un tamamını tekrar göndermesini iste.",
+      "unknown": "JSON'u bu noktanın çevresinde kontrol et."
+    },
+    "warning": {
+      "odd_dollar": "Soru {question}: {field} eşi olmayan bir $ var, düz metin olarak gösterilecek.",
+      "math_unparseable": "Soru {question}: {field} bir formül gösterilemiyor: {snippet}",
+      "duplicate_option": "Soru {question}: iki şık birebir aynı.",
+      "duplicate_question": "Soru {question} daha önceki bir sorunun tekrarı.",
+      "images_unsupported": "{count} soruda görsel vardı. Görseller henüz desteklenmiyor ve dahil edilmedi.",
+      "backslashes_repaired": "Yapay zekânın çift yazmayı unuttuğu {count} LaTeX ters eğik çizgisini düzelttik."
+    }
+  },
+  "session": {
+    "quit": "Çık",
+    "leaveTitle": "Testten çıkılsın mı?",
+    "leaveBody": "İlerlemen kaydedildi. Kütüphaneden devam edebilirsin.",
+    "leave": "Çık",
+    "stay": "Kal",
+    "next": "Sonraki",
+    "prev": "Geri",
+    "finish": "Bitir",
+    "submit": "Teslim et",
+    "explanation": "Açıklama",
+    "noExplanation": "Açıklama yok.",
+    "progress": "{i} / {n}",
+    "submitTitle": "Sınav teslim edilsin mi?",
+    "submitUnanswered": "{n} soru cevapsız ve yanlış sayılacak.",
+    "submitUnanswered_one": "{n} soru cevapsız ve yanlış sayılacak.",
+    "submitAllAnswered": "Tüm sorular cevaplandı.",
+    "grid": "Sorular",
+    "cannotResume": "Soruları silindiği için bu teste devam edilemedi."
+  },
+  "option": {
+    "label": "{letter} şıkkı",
+    "correct": "doğru",
+    "wrong": "yanlış, senin cevabın",
+    "selected": "seçili",
+    "missed": "doğru cevap"
+  },
+  "results": {
+    "title": "Sonuçlar",
+    "time": "Süre: {time}",
+    "wrongList": "Tekrar edilecekler",
+    "allCorrect": "Hepsi doğru!",
+    "redoWrong": "{n} yanlışı tekrar çöz",
+    "redoWrong_one": "{n} yanlışı tekrar çöz",
+    "retakeAll": "Hepsini tekrar çöz",
+    "review": "Cevapları incele",
+    "backToLibrary": "Kütüphaneye dön",
+    "questionN": "Soru {n}",
+    "notAnswered": "cevaplanmadı",
+    "notFound": "Bu sonuç bulunamadı.",
+    "chooseMode": "Hangi mod?"
+  },
+  "review": {
+    "title": "İnceleme",
+    "onlyWrong": "Sadece yanlışlar",
+    "all": "Hepsi",
+    "yourAnswer": "Senin cevabın",
+    "correctAnswer": "Doğru cevap",
+    "notAnswered": "Bu soruyu cevaplamadın."
+  },
+  "history": {
+    "title": "Geçmiş",
+    "empty": "Bitirdiğin testler burada görünür."
+  },
+  "settings": {
+    "title": "Ayarlar",
+    "language": "Dil",
+    "theme": "Görünüm",
+    "themeSystem": "Sistem",
+    "themeLight": "Açık",
+    "themeDark": "Koyu",
+    "data": "Veriler",
+    "deleteAll": "Tüm verileri sil",
+    "deleteAllConfirm": "Bu cihazdaki tüm klasörler, testler ve sonuçlar silinsin mi? Bu geri alınamaz.",
+    "about": "Quizkit tamamen çevrimdışı çalışır. İçe aktardığın ve cevapladığın hiçbir şey bu cihazdan çıkmaz."
+  },
+  "app": {
+    "loadError": "Quizkit verilerini açamadı.",
+    "retry": "Tekrar dene",
+    "resetData": "Uygulama verilerini sıfırla",
+    "resetConfirm": "Bu, cihazdaki tüm testleri ve sonuçları siler. Devam edilsin mi?"
+  },
+  "errorBoundary": {
+    "title": "Bir şeyler ters gitti",
+    "body": "Testlerin ve ilerlemen kaydedildi.",
+    "goLibrary": "Kütüphaneye git"
+  }
+}

@@ -1,5 +1,6 @@
 import { getLocales } from 'expo-localization';
 import KvStorage from 'expo-sqlite/kv-store';
+import { deleteDatabaseAsync } from 'expo-sqlite';
 import { useStore } from 'zustand';
 
 import { createAttemptRepo } from '@/db/attemptRepo';
@@ -8,6 +9,7 @@ import { createLibraryRepo } from '@/db/libraryRepo';
 import { migrate } from '@/db/migrations';
 import { createSessionRepo } from '@/db/sessionRepo';
 import type { SqlDb } from '@/db/sqlDb';
+import { languageFromLocale } from '@/i18n';
 
 import { createHistoryStore, type HistoryState } from './historyStore';
 import { createLibraryStore, type LibraryState } from './libraryStore';
@@ -36,21 +38,42 @@ function buildStores(db: SqlDb, defaultLanguage: Language) {
 
 export type Stores = ReturnType<typeof buildStores>;
 
+const DB_NAME = 'quizkit.db';
 let stores: Stores | null = null;
 
 export function deviceLanguage(): Language {
-  return getLocales()[0]?.languageCode === 'tr' ? 'tr' : 'en';
+  return languageFromLocale(getLocales()[0]?.languageCode);
 }
 
 /** Opens the database, runs migrations and hydrates every store. Call once from the root layout. */
 export async function initStores(): Promise<Stores> {
   if (stores) return stores;
-  const db = await openExpoDb();
+  const db = await openExpoDb(DB_NAME);
   await migrate(db);
   const s = buildStores(db, deviceLanguage());
   await Promise.all([s.settings.getState().hydrate(), s.library.getState().hydrate(), s.session.getState().hydrate()]);
   stores = s;
   return s;
+}
+
+/** Removes every folder, quiz, attempt and the active session, then reloads the stores. Settings are kept. */
+export async function deleteAllData(): Promise<void> {
+  const s = getStores();
+  await s.session.getState().abandon();
+  await s.db.transaction(async () => {
+    await s.db.run('DELETE FROM attempts');
+    await s.db.run('DELETE FROM questions');
+    await s.db.run('DELETE FROM quizzes');
+    await s.db.run('DELETE FROM folders');
+    await s.db.run('DELETE FROM active_session');
+  });
+  await Promise.all([s.library.getState().hydrate(), s.history.getState().loadRecent(50)]);
+}
+
+/** Last resort when the database cannot be opened: deletes the file so the next start begins empty. */
+export async function resetDatabaseFile(): Promise<void> {
+  stores = null;
+  await deleteDatabaseAsync(DB_NAME);
 }
 
 export function getStores(): Stores {

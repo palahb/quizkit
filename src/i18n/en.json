@@ -1,0 +1,205 @@
+{
+  "common": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "rename": "Rename",
+    "move": "Move",
+    "ok": "OK",
+    "back": "Back",
+    "close": "Close",
+    "root": "Library (top level)",
+    "loading": "Loading…"
+  },
+  "tabs": {
+    "library": "Library",
+    "history": "History",
+    "settings": "Settings"
+  },
+  "mode": {
+    "practice": "Practice",
+    "exam": "Exam"
+  },
+  "library": {
+    "title": "Library",
+    "empty": "No quizzes yet",
+    "emptyHint": "Ask ChatGPT or Claude to turn your notes or past exam questions into a quiz. Tap Import, then “Copy prompt for ChatGPT/Claude” to get the exact instructions.",
+    "emptyFolder": "This folder is empty",
+    "newFolder": "New folder",
+    "importQuiz": "Import quiz",
+    "folderName": "Folder name",
+    "quizCount": "{n} questions",
+    "quizCount_one": "{n} question",
+    "itemCount": "{n} items",
+    "itemCount_one": "{n} item",
+    "lastScore": "Last: {score}/{total}",
+    "playAll": "Play all mixed",
+    "resumeTitle": "Unfinished quiz",
+    "resumeBody": "{answered} of {total} answered",
+    "resume": "Resume",
+    "discard": "Discard",
+    "discardConfirm": "Discard your unfinished quiz? Its answers will be lost.",
+    "deleteFolderConfirm": "Delete “{name}”? Its subfolders and quizzes are removed too. Your history is kept.",
+    "deleteQuizConfirm": "Delete “{name}”? Your history is kept.",
+    "activeSessionConfirm": "This is part of your unfinished quiz. Delete it anyway and discard that progress?",
+    "renameFolder": "Rename folder",
+    "renameQuiz": "Rename quiz",
+    "moveTo": "Move to…",
+    "actions": "Actions"
+  },
+  "quiz": {
+    "start": "Start",
+    "pastAttempts": "Past attempts",
+    "noAttempts": "No attempts yet",
+    "notFound": "This quiz no longer exists."
+  },
+  "start": {
+    "title": "Start",
+    "mode": "Mode",
+    "practiceHint": "See the answer and explanation right after each question.",
+    "examHint": "Answers are revealed only after you submit. A stopwatch runs.",
+    "shuffleQuestions": "Shuffle questions",
+    "shuffleOptions": "Shuffle options",
+    "shuffleOptionsHint": "Off by default: options like “A and B” depend on their order.",
+    "go": "Start",
+    "noQuestions": "There are no questions here yet."
+  },
+  "import": {
+    "title": "Import quiz",
+    "pasteLabel": "Paste the quiz JSON",
+    "pastePlaceholder": "{ \"schemaVersion\": 1, \"title\": …, \"questions\": [ … ] }",
+    "pasteFromClipboard": "Paste from clipboard",
+    "pickFile": "Pick .json file",
+    "copyPrompt": "Copy prompt for ChatGPT/Claude",
+    "promptCopied": "Prompt copied. Paste it into ChatGPT or Claude together with your notes or PDF.",
+    "check": "Check",
+    "clipboardEmpty": "The clipboard is empty.",
+    "fileTooLarge": "This file is too big to import (limit 10 MB).",
+    "fileReadError": "The file could not be read.",
+    "errorsTitle": "We couldn't import this",
+    "more": "+{n} more problems",
+    "warningsTitle": "Please check",
+    "previewTitle": "Ready to import",
+    "previewCount": "{n} questions",
+    "previewCount_one": "{n} question",
+    "firstQuestion": "First question",
+    "saveTo": "Save to",
+    "save": "Save quiz",
+    "duplicateTitle": "Already imported",
+    "duplicateBody": "“{title}” with the same questions is already in your library. Import again anyway?",
+    "importAnyway": "Import again",
+    "field": {
+      "question": "question",
+      "option": "options",
+      "explanation": "explanation"
+    },
+    "issue": {
+      "empty": "Nothing to import. Paste the quiz JSON first.",
+      "too_large": "This is too big to import (limit {maxMb} MB).",
+      "not_utf8": "This file isn't UTF-8 text. Save it as UTF-8 and try again.",
+      "wrong_shape": "This doesn't look like a Quizkit quiz. It must be one JSON object with \"title\" and \"questions\".",
+      "syntax": "The JSON has a mistake at line {line}, column {column}.",
+      "schema_version_unsupported": "This quiz uses format version {found}. This app reads version 1: set \"schemaVersion\": 1, or update the app.",
+      "title_invalid": "The quiz needs a \"title\" of 1–{max} characters.",
+      "questions_count": "A quiz needs 1–5000 questions (found {count}).",
+      "question_text_missing": "Question {question}: the \"question\" text is missing.",
+      "options_count": "Question {question}: needs 2–6 options (found {count}).",
+      "option_not_string": "Question {question}: option {option} must be text.",
+      "option_empty": "Question {question}: option {option} is empty.",
+      "answer_invalid": "Question {question}: \"answer\" must be a letter A–F (found \"{answer}\").",
+      "answer_out_of_range": "Question {question}: the answer is “{answer}” but there are only {optionCount} options.",
+      "duplicate_id": "Question {question}: the id “{id}” is used twice."
+    },
+    "hint": {
+      "trailing_comma": "There is an extra comma before a closing bracket.",
+      "missing_quote": "A quotation mark seems to be missing.",
+      "truncated": "The text ends too early. The AI probably stopped mid-answer: ask it to continue, or to send the whole JSON again.",
+      "unknown": "Check the JSON around this spot."
+    },
+    "warning": {
+      "odd_dollar": "Question {question}: a $ in the {field} has no partner, so it is shown as plain text.",
+      "math_unparseable": "Question {question}: a formula in the {field} can't be displayed: {snippet}",
+      "duplicate_option": "Question {question}: two options are identical.",
+      "duplicate_question": "Question {question} repeats an earlier question.",
+      "images_unsupported": "{count} questions had images. Images aren't supported yet and were left out.",
+      "backslashes_repaired": "We fixed {count} LaTeX backslashes the AI forgot to double."
+    }
+  },
+  "session": {
+    "quit": "Quit",
+    "leaveTitle": "Leave quiz?",
+    "leaveBody": "Your progress is saved. You can resume from the library.",
+    "leave": "Leave",
+    "stay": "Stay",
+    "next": "Next",
+    "prev": "Back",
+    "finish": "Finish",
+    "submit": "Submit",
+    "explanation": "Explanation",
+    "noExplanation": "No explanation provided.",
+    "progress": "{i} / {n}",
+    "submitTitle": "Submit exam?",
+    "submitUnanswered": "{n} questions are unanswered and will count as wrong.",
+    "submitUnanswered_one": "{n} question is unanswered and will count as wrong.",
+    "submitAllAnswered": "All questions are answered.",
+    "grid": "Questions",
+    "cannotResume": "This quiz could not be resumed because its questions were deleted."
+  },
+  "option": {
+    "label": "Option {letter}",
+    "correct": "correct",
+    "wrong": "wrong, your answer",
+    "selected": "selected",
+    "missed": "correct answer"
+  },
+  "results": {
+    "title": "Results",
+    "time": "Time: {time}",
+    "wrongList": "To review",
+    "allCorrect": "Everything correct!",
+    "redoWrong": "Redo {n} wrong",
+    "redoWrong_one": "Redo {n} wrong",
+    "retakeAll": "Retake all",
+    "review": "Review answers",
+    "backToLibrary": "Back to library",
+    "questionN": "Question {n}",
+    "notAnswered": "not answered",
+    "notFound": "This result could not be found.",
+    "chooseMode": "Which mode?"
+  },
+  "review": {
+    "title": "Review",
+    "onlyWrong": "Only wrong",
+    "all": "All",
+    "yourAnswer": "Your answer",
+    "correctAnswer": "Correct answer",
+    "notAnswered": "You didn't answer this question."
+  },
+  "history": {
+    "title": "History",
+    "empty": "Finished quizzes appear here."
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "theme": "Appearance",
+    "themeSystem": "System",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "data": "Data",
+    "deleteAll": "Delete all data",
+    "deleteAllConfirm": "Delete every folder, quiz and result on this device? This cannot be undone.",
+    "about": "Quizkit works fully offline. Nothing you import or answer leaves this device."
+  },
+  "app": {
+    "loadError": "Quizkit could not open its data.",
+    "retry": "Try again",
+    "resetData": "Reset app data",
+    "resetConfirm": "This deletes all quizzes and results on this device. Continue?"
+  },
+  "errorBoundary": {
+    "title": "Something went wrong",
+    "body": "Your quizzes and progress are saved.",
+    "goLibrary": "Go to library"
+  }
+}
