@@ -1,12 +1,25 @@
-import { Screen, T } from '@/components/ui';
-import { useT } from '@/hooks/useT';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback } from 'react';
 
-// Placeholder until Task 14 builds the history list.
+import { Screen } from '@/components/ui';
+import { showError } from '@/features/library/flows';
+import { HistoryList } from '@/features/results/HistoryList';
+import { useHistoryStore, useSettingsStore } from '@/stores';
+
 export default function HistoryScreen() {
-  const t = useT();
+  const recent = useHistoryStore((s) => s.recent);
+  const loadRecent = useHistoryStore((s) => s.loadRecent);
+  const language = useSettingsStore((s) => s.language);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadRecent(200).catch(showError);
+    }, [loadRecent]),
+  );
+
   return (
     <Screen>
-      <T variant="muted">{t('history.empty')}</T>
+      <HistoryList items={recent} language={language} onOpen={(id) => router.push({ pathname: '/results/[attemptId]', params: { attemptId: id } })} />
     </Screen>
   );
 }
