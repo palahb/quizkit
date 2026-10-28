@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "folders": [
+    {
+      "name": "Economics",
+      "folders": [
+        {
+          "name": "2023",
+          "quizzes": [
+            {
+              "title": "Economics – Midterm 2023",
+              "questions": [
+                {
+                  "question": "According to the law of demand, what happens to quantity demanded when the price rises?",
+                  "options": [
+                    "It rises",
+                    "It falls",
+                    "It stays the same",
+                    "It rises, then falls",
+                    "It becomes zero"
+                  ],
+                  "answer": "B",
+                  "explanation": "All else equal, price and quantity demanded move in opposite directions."
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "quizzes": [
+        {
+          "title": "Economics – Unit 1",
+          "questions": [
+            {
+              "question": "Which science studies how scarce resources are allocated to unlimited wants?",
+              "options": [
+                "Sociology",
+                "Economics",
+                "Law",
+                "Psychology",
+                "Geography"
+              ],
+              "answer": "B"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

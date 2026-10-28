@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "title": "Calculus – Integrals",
+  "language": "en",
+  "questions": [
+    {
+      "question": "What is the value of $\\int_0^1 x^2\\,dx$?",
+      "options": [
+        "$\\frac{1}{3}$",
+        "$\\frac{1}{2}$",
+        "$1$",
+        "$2$",
+        "$\\frac{2}{3}$"
+      ],
+      "answer": "A",
+      "explanation": "$$\\int_0^1 x^2\\,dx = \\left[\\frac{x^3}{3}\\right]_0^1 = \\frac{1}{3}$$"
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "folders": [
+    {
+      "name": "İktisat",
+      "folders": [
+        {
+          "name": "2023",
+          "quizzes": [
+            {
+              "title": "İktisat – Ara Sınav 2023",
+              "questions": [
+                {
+                  "question": "Talep kanununa göre fiyat artarsa talep edilen miktar ne olur?",
+                  "options": [
+                    "Artar",
+                    "Azalır",
+                    "Değişmez",
+                    "Önce artar sonra azalır",
+                    "Sıfır olur"
+                  ],
+                  "answer": "B",
+                  "explanation": "Diğer koşullar sabitken fiyat ile talep edilen miktar ters yönlü hareket eder."
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "quizzes": [
+        {
+          "title": "İktisat – Ünite 1",
+          "questions": [
+            {
+              "question": "Kıt kaynakların sınırsız ihtiyaçlara dağıtımını inceleyen bilim hangisidir?",
+              "options": [
+                "Sosyoloji",
+                "İktisat",
+                "Hukuk",
+                "Psikoloji",
+                "Coğrafya"
+              ],
+              "answer": "B"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

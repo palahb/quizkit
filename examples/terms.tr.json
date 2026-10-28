@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "title": "İktisat – Temel Kavramlar",
+  "language": "tr",
+  "questions": [
+    {
+      "question": "“Genel fiyat düzeyinin sürekli artması” hangi kavramın tanımıdır?",
+      "options": [
+        "Deflasyon",
+        "Enflasyon",
+        "Devalüasyon",
+        "Stagflasyon",
+        "Resesyon"
+      ],
+      "answer": "B",
+      "explanation": "Enflasyon, genel fiyat düzeyindeki sürekli artıştır; deflasyon bunun tersidir."
+    }
+  ]
+}

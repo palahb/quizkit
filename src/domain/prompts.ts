@@ -18,7 +18,8 @@ const json = (value: unknown) => JSON.stringify(value, null, 2);
 
 // ---------- Example content (LaTeX written with single backslashes; JSON.stringify doubles them) ----------
 
-const EXAMPLES = {
+/** Example quizzes used in the prompts (and published in examples/). */
+export const PROMPT_EXAMPLES = {
   tr: {
     single: {
       schemaVersion: 1,
@@ -217,7 +218,7 @@ function assemble(lang: PromptLanguage, intro: string[], extra: string[], exampl
 // ---------- Prompts ----------
 
 function buildTr(): PromptDef[] {
-  const ex = EXAMPLES.tr;
+  const ex = PROMPT_EXAMPLES.tr;
   return [
     {
       id: 'notes',
@@ -339,7 +340,7 @@ function buildTr(): PromptDef[] {
 }
 
 function buildEn(): PromptDef[] {
-  const ex = EXAMPLES.en;
+  const ex = PROMPT_EXAMPLES.en;
   return [
     {
       id: 'notes',

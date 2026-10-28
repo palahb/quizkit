@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "title": "Biology – Cell Structure",
+  "language": "en",
+  "questions": [
+    {
+      "question": "Which organelle produces most of the cell's ATP?",
+      "options": [
+        "Nucleus",
+        "Ribosome",
+        "Mitochondrion",
+        "Golgi apparatus",
+        "Lysosome"
+      ],
+      "answer": "C",
+      "explanation": "Mitochondria carry out cellular respiration, which produces most of the ATP."
+    }
+  ]
+}

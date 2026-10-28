@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "title": "Uluslararası İşletmecilik – Ara Sınav 2023",
+  "language": "tr",
+  "questions": [
+    {
+      "question": "İşletmenin faaliyetlerini yürüttüğü yabancı ülkeye ne ad verilir?",
+      "options": [
+        "Bağlı ülke",
+        "Ev sahibi ülke",
+        "Ana ülke",
+        "Üçüncü ülke",
+        "Yatırımcı ülke"
+      ],
+      "answer": "B",
+      "explanation": "İşletmenin merkezi dışında faaliyet yürüttüğü yabancı ülkeye ev sahibi ülke denir."
+    }
+  ]
+}

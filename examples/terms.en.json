@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "title": "Economics – Key Terms",
+  "language": "en",
+  "questions": [
+    {
+      "question": "Which term means “a sustained rise in the general price level”?",
+      "options": [
+        "Deflation",
+        "Inflation",
+        "Devaluation",
+        "Stagflation",
+        "Recession"
+      ],
+      "answer": "B",
+      "explanation": "Inflation is a sustained rise in the general price level; deflation is the opposite."
+    }
+  ]
+}
