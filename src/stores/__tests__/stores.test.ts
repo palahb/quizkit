@@ -5,6 +5,8 @@ import { createSessionRepo, type SessionRepo } from '@/db/sessionRepo';
 import { createBetterSqliteDb } from '@/db/testing/betterSqliteDb';
 import { makeQuiz } from '@/db/testing/fixtures';
 import { mulberry32 } from '@/engine/rng';
+import { planCollection } from '@/domain/collectionPlan';
+import { parseImport } from '@/domain/parseImport';
 
 import { createHistoryStore } from '../historyStore';
 import { createLibraryStore } from '../libraryStore';
@@ -109,6 +111,40 @@ describe('libraryStore', () => {
     await sessionStore.getState().start({ scope: { kind: 'quiz', quizId: quiz.id }, mode: 'practice', shuffleQuestions: false, shuffleOptions: false });
     await flush();
     await expect(libraryStore.getState().deleteFolder(f.id)).rejects.toThrow('QUIZ_IN_ACTIVE_SESSION');
+  });
+});
+
+describe('libraryStore.importCollection', () => {
+  const q = (t: string) => ({ question: t, options: ['a', 'b'], answer: 'A' });
+  const raw = JSON.stringify({
+    schemaVersion: 1,
+    folders: [{ name: 'Course', quizzes: [{ title: 'Unit 1', questions: [q('1')] }] }],
+    quizzes: [{ title: 'Broken', questions: [] }],
+  });
+  function plan(store: ReturnType<typeof createLibraryStore>) {
+    const r = parseImport(raw);
+    if (r.kind !== 'collection' || !r.result.ok) throw new Error('fixture');
+    const { folders, quizzes } = store.getState();
+    return planCollection(folders, quizzes, null, r.result.collection);
+  }
+
+  it('saves the new quizzes and folders and refreshes the library', async () => {
+    const { libraryStore } = await setup();
+    await libraryStore.getState().hydrate();
+    const result = await libraryStore.getState().importCollection(null, plan(libraryStore));
+    expect(result).toEqual({ createdFolders: 1, importedQuizzes: 1 });
+    expect(libraryStore.getState().folders.map((f) => f.name)).toEqual(['Course']);
+    expect(libraryStore.getState().quizzes.map((x) => x.title)).toEqual(['Unit 1']);
+  });
+
+  it('leaves the library unchanged and records the error when saving fails', async () => {
+    const { library } = await setup();
+    const failing: LibraryRepo = { ...library, importCollection: () => Promise.reject(new Error('disk full')) };
+    const store = createLibraryStore(failing, { getActiveSession: async () => null, discardActiveSession: async () => {} });
+    await store.getState().hydrate();
+    await expect(store.getState().importCollection(null, plan(store))).rejects.toThrow('disk full');
+    expect(store.getState().folders).toEqual([]);
+    expect(store.getState().error).toBe('disk full');
   });
 });
 

@@ -180,19 +180,27 @@ function checkQuestion(raw: unknown, n: number, issues: ImportIssue[], seenIds: 
   return { question, letter: answer.data, rawOptions: options };
 }
 
-/** Validates pasted or file-loaded quiz JSON. Never throws. */
-export function parseQuizJson(raw: string): ImportResult {
-  if (raw.trim() === '') return failure('empty', [{ code: 'empty', params: {} }]);
-  if (raw.length > MAX_INPUT_BYTES) return failure('too-large', [{ code: 'too_large', params: { maxMb: 10 } }]);
-  if (raw.includes('\u0000')) return failure('not-utf8', [{ code: 'not_utf8', params: {} }]);
+export type PreparedJson =
+  | { ok: true; data: Record<string, unknown>; repairWarnings: ImportWarning[] }
+  | { ok: false; result: ImportResult };
+
+/**
+ * Turns pasted text into a JSON object: size/encoding checks, finds the JSON inside chatter,
+ * repairs LaTeX backslashes and unescaped quotes. Never throws.
+ */
+export function prepareJson(raw: string): PreparedJson {
+  const fail = (kind: ImportFailureKind, issues: ImportIssue[]) => ({ ok: false as const, result: failure(kind, issues) });
+  if (raw.trim() === '') return fail('empty', [{ code: 'empty', params: {} }]);
+  if (raw.length > MAX_INPUT_BYTES) return fail('too-large', [{ code: 'too_large', params: { maxMb: 10 } }]);
+  if (raw.includes('\u0000')) return fail('not-utf8', [{ code: 'not_utf8', params: {} }]);
 
   const extracted = extractJson(raw);
   if (extracted === null) {
-    const trimmed = raw.trim().replace(/^﻿/, '');
+    const trimmed = raw.trim().replace(/^\uFEFF/, '');
     if (trimmed.startsWith('[') || trimmed.startsWith('"') || /^[\d-]|^(true|false|null)\b/.test(trimmed)) {
-      return failure('wrong-shape', [{ code: 'wrong_shape', params: {} }]);
+      return fail('wrong-shape', [{ code: 'wrong_shape', params: {} }]);
     }
-    return failure('syntax', [syntaxIssue(trimmed, null)]);
+    return fail('syntax', [syntaxIssue(trimmed, null)]);
   }
 
   const repaired = repairBackslashes(extracted);
@@ -208,17 +216,28 @@ export function parseQuizJson(raw: string): ImportResult {
       parsed = JSON.parse(requoted.json);
       quotesFixed = requoted.fixed;
     } catch {
-      return failure('syntax', [locatedSyntaxIssue(raw, extracted) ?? syntaxIssue(repaired.json, e)]);
+      return fail('syntax', [locatedSyntaxIssue(raw, extracted) ?? syntaxIssue(repaired.json, e)]);
     }
   }
   if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
-    return failure('wrong-shape', [{ code: 'wrong_shape', params: {} }]);
+    return fail('wrong-shape', [{ code: 'wrong_shape', params: {} }]);
   }
   const restored = restoreLatexEscapes(parsed);
-  const data = restored.value as Record<string, unknown>;
 
+  const repairWarnings: ImportWarning[] = [];
+  const fixedCount = repaired.fixed + restored.fixed;
+  if (fixedCount > 0) repairWarnings.push({ code: 'backslashes_repaired', params: { count: fixedCount } });
+  if (quotesFixed > 0) repairWarnings.push({ code: 'quotes_repaired', params: { count: quotesFixed } });
+  return { ok: true, data: restored.value as Record<string, unknown>, repairWarnings };
+}
+
+/**
+ * Validates one quiz object (already parsed). Inside a collection the quiz may omit
+ * schemaVersion, because the collection declares it.
+ */
+export function validateQuiz(data: Record<string, unknown>, opts: { requireSchemaVersion: boolean }): ImportResult {
   const issues: ImportIssue[] = [];
-  if (!schemaVersionSchema.safeParse(data.schemaVersion).success) {
+  if (opts.requireSchemaVersion && !schemaVersionSchema.safeParse(data.schemaVersion).success) {
     issues.push({ code: 'schema_version_unsupported', params: { found: String(data.schemaVersion) } });
   }
   const title = titleSchema.safeParse(data.title);
@@ -235,10 +254,6 @@ export function parseQuizJson(raw: string): ImportResult {
   const good = checked as CheckedQuestion[];
 
   const warnings: ImportWarning[] = [];
-  const fixedCount = repaired.fixed + restored.fixed;
-  if (fixedCount > 0) warnings.push({ code: 'backslashes_repaired', params: { count: fixedCount } });
-  if (quotesFixed > 0) warnings.push({ code: 'quotes_repaired', params: { count: quotesFixed } });
-
   const imageCount = questionsArr.data.filter(
     (q) => q !== null && typeof q === 'object' && ('image' in q || 'images' in q),
   ).length;
@@ -280,4 +295,12 @@ export function parseQuizJson(raw: string): ImportResult {
     },
     warnings,
   };
+}
+
+/** Validates pasted or file-loaded quiz JSON. Never throws. */
+export function parseQuizJson(raw: string): ImportResult {
+  const prepared = prepareJson(raw);
+  if (!prepared.ok) return prepared.result;
+  const result = validateQuiz(prepared.data, { requireSchemaVersion: true });
+  return result.ok ? { ...result, warnings: [...prepared.repairWarnings, ...result.warnings] } : result;
 }

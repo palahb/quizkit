@@ -142,6 +142,47 @@ describe('LibraryRepo quizzes', () => {
   });
 });
 
+describe('LibraryRepo.importCollection', () => {
+  it('creates nested folders, reuses existing ones by name, and places quizzes', async () => {
+    const { library } = await setup();
+    const target = await library.createFolder('Target', null);
+    const existing = await library.createFolder('AÖF', target.id);
+    const r = await library.importCollection(
+      target.id,
+      [['aöf'], ['aöf', 'İktisat'], ['Empty']],
+      [
+        { path: ['aöf', 'İktisat'], quiz: makeQuiz(2, 'Ara') },
+        { path: [], quiz: makeQuiz(1, 'Top') },
+      ],
+    );
+    expect(r).toEqual({ createdFolders: 2, importedQuizzes: 2 });
+
+    const folders = await library.listFolders();
+    const byName = (n: string) => folders.find((f) => f.name === n)!;
+    expect(folders.filter((f) => f.name.toLocaleLowerCase('tr') === 'aöf')).toHaveLength(1);
+    expect(byName('İktisat').parentId).toBe(existing.id);
+    expect(byName('Empty').parentId).toBe(target.id);
+
+    const quizzes = await library.listQuizSummaries();
+    expect(quizzes.find((q) => q.title === 'Ara')?.folderId).toBe(byName('İktisat').id);
+    expect(quizzes.find((q) => q.title === 'Top')?.folderId).toBe(target.id);
+  });
+
+  it('saves nothing when any part fails', async () => {
+    const { library } = await setup();
+    const same = makeQuiz(1, 'Clash');
+    // The same question ids twice violate the primary key on the second insert.
+    await expect(
+      library.importCollection(null, [['New']], [
+        { path: ['New'], quiz: same },
+        { path: [], quiz: same },
+      ]),
+    ).rejects.toThrow();
+    expect(await library.listFolders()).toEqual([]);
+    expect(await library.listQuizSummaries()).toEqual([]);
+  });
+});
+
 describe('AttemptRepo', () => {
   it('lists newest first and gets full attempts', async () => {
     const { attempts } = await setup();

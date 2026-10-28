@@ -5,7 +5,7 @@ import tr from '../tr.json';
 const ISSUE_CODES = [
   'empty', 'too_large', 'not_utf8', 'wrong_shape', 'syntax', 'schema_version_unsupported', 'title_invalid',
   'questions_count', 'question_text_missing', 'options_count', 'option_not_string', 'option_empty',
-  'answer_invalid', 'answer_out_of_range', 'duplicate_id', 'syntax_in_question',
+  'answer_invalid', 'answer_out_of_range', 'duplicate_id', 'syntax_in_question', 'folder_name_invalid', 'folders_too_deep', 'collection_empty', 'collection_too_many',
 ];
 const WARNING_CODES = ['odd_dollar', 'math_unparseable', 'duplicate_option', 'duplicate_question', 'images_unsupported', 'backslashes_repaired', 'quotes_repaired'];
 const SYNTAX_HINTS = ['trailing_comma', 'missing_quote', 'truncated', 'unknown', 'inner_quote', 'missing_comma'];

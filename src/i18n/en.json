@@ -14,7 +14,8 @@
   "tabs": {
     "library": "Library",
     "history": "History",
-    "settings": "Settings"
+    "settings": "Settings",
+    "prompts": "Prompts"
   },
   "mode": {
     "practice": "Practice",
@@ -23,7 +24,7 @@
   "library": {
     "title": "Library",
     "empty": "No quizzes yet",
-    "emptyHint": "Ask ChatGPT or Claude to turn your notes or past exam questions into a quiz. Tap Import, then “Copy prompt for ChatGPT/Claude” to get the exact instructions.",
+    "emptyHint": "Ask ChatGPT or Claude to turn your notes or past exam questions into a quiz. Ready-made instructions are in the Prompts tab: copy one, give it to the AI with your material, then paste the reply into Import.",
     "emptyFolder": "This folder is empty",
     "newFolder": "New folder",
     "importQuiz": "Import quiz",
@@ -71,7 +72,6 @@
     "pasteFromClipboard": "Paste from clipboard",
     "pickFile": "Pick .json file",
     "copyPrompt": "Copy prompt for ChatGPT/Claude",
-    "promptCopied": "Prompt copied. Paste it into ChatGPT or Claude together with your notes or PDF.",
     "clear": "Clear",
     "clipboardEmpty": "The clipboard is empty.",
     "fileTooLarge": "This file is too big to import (limit 10 MB).",
@@ -109,7 +109,11 @@
       "answer_invalid": "Question {question}: \"answer\" must be a letter A–F (found \"{answer}\").",
       "answer_out_of_range": "Question {question}: the answer is “{answer}” but there are only {optionCount} options.",
       "duplicate_id": "Question {question}: the id “{id}” is used twice.",
-      "syntax_in_question": "Question {question}, field \"{field}\": the JSON has a mistake at line {line}, column {column}."
+      "syntax_in_question": "Question {question}, field \"{field}\": the JSON has a mistake at line {line}, column {column}.",
+      "folder_name_invalid": "A folder has no name or its name is too long: {path}",
+      "folders_too_deep": "Folders can be nested at most {max} levels deep.",
+      "collection_empty": "This file contains no quizzes.",
+      "collection_too_many": "A file can contain at most {max} quizzes (found {count})."
     },
     "hint": {
       "trailing_comma": "There is an extra comma before a closing bracket.",
@@ -127,6 +131,26 @@
       "images_unsupported": "{count} questions had images. Images aren't supported yet and were left out.",
       "backslashes_repaired": "We fixed {count} LaTeX backslashes the AI forgot to double.",
       "quotes_repaired": "We turned {count} quotation marks inside texts into “ ” so the quiz could be read."
+    },
+    "allPrompts": "All prompts",
+    "collection": {
+      "summary": "{folders} folders · {quizzes} quizzes · {questions} questions",
+      "folderNew": "new",
+      "folderExisting": "will be added to the existing folder",
+      "quizDuplicate": "already in your library, will be skipped",
+      "quizInvalid": "has errors, will be skipped",
+      "quizWarnings": "{n} warnings",
+      "quizWarnings_one": "{n} warning",
+      "questions": "{n} questions",
+      "questions_one": "{n} question",
+      "topLevel": "Top level",
+      "save": "Save {n} quizzes",
+      "save_one": "Save {n} quiz",
+      "nothingToSave": "There is no new quiz to save.",
+      "savedTitle": "Imported",
+      "saved": "{quizzes} quizzes and {folders} new folders were added.",
+      "skipped": "{n} quizzes were skipped.",
+      "skipped_one": "{n} quiz was skipped."
     }
   },
   "session": {
@@ -205,5 +229,11 @@
     "title": "Something went wrong",
     "body": "Your quizzes and progress are saved.",
     "goLibrary": "Go to library"
+  },
+  "prompts": {
+    "title": "Prompts",
+    "intro": "Ready-made instructions for ChatGPT or Claude. Copy one, paste it into the AI together with your material, then paste the reply into Import.",
+    "copy": "Copy",
+    "copied": "Copied. Paste it into ChatGPT or Claude together with your material."
   }
 }

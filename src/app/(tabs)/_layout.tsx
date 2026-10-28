@@ -17,6 +17,13 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="prompts"
+        options={{
+          title: t('tabs.prompts'),
+          tabBarIcon: ({ color }) => <Icon name={{ ios: 'text.bubble', android: 'chat' }} color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="history"
         options={{
           title: t('tabs.history'),

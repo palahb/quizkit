@@ -1,3 +1,4 @@
+import { findChildFolder } from '@/domain/collectionPlan';
 import { newId } from '@/domain/ids';
 import type { Folder, Id, ParsedQuiz, Question, QuestionRef, QuizSummary } from '@/domain/types';
 
@@ -20,6 +21,16 @@ export interface LibraryRepo {
   /** Questions in ref order; refs whose question no longer exists are skipped. */
   getQuestionsByRefs(refs: QuestionRef[]): Promise<Question[]>;
   findQuizByHash(hash: string): Promise<QuizSummary | null>;
+  /**
+   * Creates the folder paths under `targetId` (reusing folders with the same name, ignoring
+   * case) and saves each quiz into its path, all in one transaction: either everything is
+   * saved or nothing is.
+   */
+  importCollection(
+    targetId: Id | null,
+    folderPaths: string[][],
+    quizzes: { path: string[]; quiz: ParsedQuiz }[],
+  ): Promise<{ createdFolders: number; importedQuizzes: number }>;
 }
 
 interface FolderRow {
@@ -75,6 +86,34 @@ export function createLibraryRepo(db: SqlDb): LibraryRepo {
     return toSummary(row);
   }
 
+  async function insertFolder(name: string, parentId: Id | null): Promise<Folder> {
+    const folder: Folder = { id: newId(), parentId, name: name.trim(), createdAt: Date.now() };
+    await db.run('INSERT INTO folders (id, parent_id, name, created_at) VALUES (?, ?, ?, ?)', [
+      folder.id,
+      parentId,
+      folder.name,
+      folder.createdAt,
+    ]);
+    return folder;
+  }
+
+  /** Inserts a quiz and its questions. Callers wrap it in a transaction. */
+  async function insertQuiz(quiz: ParsedQuiz, folderId: Id | null): Promise<Id> {
+    const id = newId();
+    await db.run(
+      `INSERT INTO quizzes (id, folder_id, title, description, language, question_count, created_at, source_hash)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [id, folderId, quiz.title, quiz.description ?? null, quiz.language ?? null, quiz.questions.length, Date.now(), quiz.sourceHash],
+    );
+    for (let start = 0; start < quiz.questions.length; start += SQL_BATCH) {
+      const batch = quiz.questions.slice(start, start + SQL_BATCH);
+      const placeholders = batch.map(() => '(?, ?, ?, ?)').join(', ');
+      const params = batch.flatMap((q, i) => [q.id, id, start + i, JSON.stringify(q)]);
+      await db.run(`INSERT INTO questions (id, quiz_id, position, payload) VALUES ${placeholders}`, params);
+    }
+    return id;
+  }
+
   return {
     async listFolders() {
       return (await db.getAll<FolderRow>('SELECT * FROM folders ORDER BY created_at')).map(toFolder);
@@ -84,16 +123,7 @@ export function createLibraryRepo(db: SqlDb): LibraryRepo {
       return (await db.getAll<QuizRow>(`${QUIZ_SELECT} ORDER BY q.created_at`)).map(toSummary);
     },
 
-    async createFolder(name, parentId) {
-      const folder: Folder = { id: newId(), parentId, name: name.trim(), createdAt: Date.now() };
-      await db.run('INSERT INTO folders (id, parent_id, name, created_at) VALUES (?, ?, ?, ?)', [
-        folder.id,
-        parentId,
-        folder.name,
-        folder.createdAt,
-      ]);
-      return folder;
-    },
+    createFolder: (name, parentId) => insertFolder(name, parentId),
 
     async renameFolder(id, name) {
       await db.run('UPDATE folders SET name = ? WHERE id = ?', [name.trim(), id]);
@@ -116,20 +146,7 @@ export function createLibraryRepo(db: SqlDb): LibraryRepo {
     },
 
     async saveQuiz(quiz, folderId) {
-      const id = newId();
-      await db.transaction(async () => {
-        await db.run(
-          `INSERT INTO quizzes (id, folder_id, title, description, language, question_count, created_at, source_hash)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-          [id, folderId, quiz.title, quiz.description ?? null, quiz.language ?? null, quiz.questions.length, Date.now(), quiz.sourceHash],
-        );
-        for (let start = 0; start < quiz.questions.length; start += SQL_BATCH) {
-          const batch = quiz.questions.slice(start, start + SQL_BATCH);
-          const placeholders = batch.map(() => '(?, ?, ?, ?)').join(', ');
-          const params = batch.flatMap((q, i) => [q.id, id, start + i, JSON.stringify(q)]);
-          await db.run(`INSERT INTO questions (id, quiz_id, position, payload) VALUES ${placeholders}`, params);
-        }
-      });
+      const id = await db.transaction(() => insertQuiz(quiz, folderId));
       return getSummary(id);
     },
 
@@ -166,6 +183,30 @@ export function createLibraryRepo(db: SqlDb): LibraryRepo {
     async findQuizByHash(hash) {
       const row = await db.getFirst<QuizRow>(`${QUIZ_SELECT} WHERE q.source_hash = ? LIMIT 1`, [hash]);
       return row ? toSummary(row) : null;
+    },
+
+    async importCollection(targetId, folderPaths, quizzes) {
+      return db.transaction(async () => {
+        const folders = (await db.getAll<FolderRow>('SELECT * FROM folders')).map(toFolder);
+        const idByPath = new Map<string, Id | null>([['', targetId]]);
+        let createdFolders = 0;
+        const ensurePath = async (path: string[]): Promise<Id | null> => {
+          const key = path.join('\u0000');
+          if (idByPath.has(key)) return idByPath.get(key)!;
+          const parentId = await ensurePath(path.slice(0, -1));
+          let folder = findChildFolder(folders, parentId, path[path.length - 1]);
+          if (!folder) {
+            folder = await insertFolder(path[path.length - 1], parentId);
+            folders.push(folder);
+            createdFolders++;
+          }
+          idByPath.set(key, folder.id);
+          return folder.id;
+        };
+        for (const path of folderPaths) await ensurePath(path);
+        for (const { path, quiz } of quizzes) await insertQuiz(quiz, await ensurePath(path));
+        return { createdFolders, importedQuizzes: quizzes.length };
+      });
     },
   };
 }

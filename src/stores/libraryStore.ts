@@ -1,6 +1,7 @@
 import { createStore } from 'zustand/vanilla';
 
 import type { LibraryRepo } from '@/db/libraryRepo';
+import type { CollectionPlan } from '@/domain/collectionPlan';
 import type { Folder, Id, ParsedQuiz, QuizSummary, Session } from '@/domain/types';
 
 export interface LibraryState {
@@ -15,6 +16,8 @@ export interface LibraryState {
   /** Rejects with QUIZ_IN_ACTIVE_SESSION unless discardActiveSession is set. */
   deleteFolder(id: Id, opts?: { discardActiveSession?: boolean }): Promise<void>;
   importQuiz(quiz: ParsedQuiz, folderId: Id | null): Promise<QuizSummary>;
+  /** Saves a planned collection: all its folders and only the quizzes planned as new. */
+  importCollection(targetId: Id | null, plan: CollectionPlan): Promise<{ createdFolders: number; importedQuizzes: number }>;
   renameQuiz(id: Id, title: string): Promise<void>;
   moveQuiz(id: Id, folderId: Id | null): Promise<void>;
   /** Rejects with QUIZ_IN_ACTIVE_SESSION unless discardActiveSession is set. */
@@ -94,6 +97,14 @@ export function createLibraryStore(repo: LibraryRepo, deps: LibraryStoreDeps) {
         await mutate(() => repo.deleteFolder(id));
       },
       importQuiz: (quiz, folderId) => mutate(() => repo.saveQuiz(quiz, folderId)),
+      importCollection: (targetId, plan) =>
+        mutate(() =>
+          repo.importCollection(
+            targetId,
+            plan.folders.map((f) => f.path),
+            plan.quizzes.flatMap((q) => (q.status === 'new' && q.entry.result.ok ? [{ path: q.entry.path, quiz: q.entry.result.quiz }] : [])),
+          ),
+        ),
       renameQuiz: (id, title) => mutate(() => repo.renameQuiz(id, title)),
       moveQuiz: (id, folderId) => mutate(() => repo.moveQuiz(id, folderId)),
       async deleteQuiz(id, opts) {

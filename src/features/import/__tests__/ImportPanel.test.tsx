@@ -4,14 +4,18 @@ import '@/test/mockWebView';
 import { fireEvent, render, screen } from '@testing-library/react-native';
 
 import { parseQuizJson } from '@/domain/parseQuizJson';
+import type { ImportResult } from '@/domain/types';
 
 import { ImportPanel, type ImportPanelProps } from '../ImportPanel';
 
 const noop = () => {};
-function props(over: Partial<ImportPanelProps> = {}): ImportPanelProps {
+/** `result` is shorthand for a single-quiz outcome. */
+function props({ result, ...over }: Partial<ImportPanelProps> & { result?: ImportResult } = {}): ImportPanelProps {
   return {
     text: '',
-    result: null,
+    outcome: result ? { kind: 'quiz', result } : null,
+    plan: null,
+    onShowPrompts: noop,
     folderLabel: 'Library (top level)',
     saving: false,
     onChangeText: noop,
@@ -103,5 +107,12 @@ describe('ImportPanel', () => {
     await render(<ImportPanel {...props({ result: parseQuizJson(raw) })} />);
     expect(screen.getByText('Question 1, field "options": the JSON has a mistake at line 2, column 30.')).toBeTruthy();
     expect(screen.getByText(/"options" \["a", "b"\]/)).toBeTruthy();
+  });
+
+  it('links to the prompt library', async () => {
+    const onShowPrompts = jest.fn();
+    await render(<ImportPanel {...props({ onShowPrompts })} />);
+    await fireEvent.press(screen.getByText('All prompts'));
+    expect(onShowPrompts).toHaveBeenCalled();
   });
 });

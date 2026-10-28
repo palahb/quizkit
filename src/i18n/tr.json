@@ -14,7 +14,8 @@
   "tabs": {
     "library": "Kütüphane",
     "history": "Geçmiş",
-    "settings": "Ayarlar"
+    "settings": "Ayarlar",
+    "prompts": "Promptlar"
   },
   "mode": {
     "practice": "Alıştırma",
@@ -23,7 +24,7 @@
   "library": {
     "title": "Kütüphane",
     "empty": "Henüz test yok",
-    "emptyHint": "ChatGPT veya Claude'dan notlarını ya da çıkmış soruları teste dönüştürmesini iste. İçe aktar'a dokun, ardından tam talimatlar için “ChatGPT/Claude için istemi kopyala”yı kullan.",
+    "emptyHint": "ChatGPT veya Claude'dan notlarını ya da çıkmış soruları teste dönüştürmesini iste. Hazır talimatlar Promptlar sekmesinde: birini kopyala, materyalinle birlikte yapay zekâya ver, gelen cevabı İçe aktar ekranına yapıştır.",
     "emptyFolder": "Bu klasör boş",
     "newFolder": "Yeni klasör",
     "importQuiz": "Test içe aktar",
@@ -70,8 +71,7 @@
     "pastePlaceholder": "{ \"schemaVersion\": 1, \"title\": …, \"questions\": [ … ] }",
     "pasteFromClipboard": "Panodan yapıştır",
     "pickFile": ".json dosyası seç",
-    "copyPrompt": "ChatGPT/Claude için istemi kopyala",
-    "promptCopied": "İstem kopyalandı. Notların veya PDF'inle birlikte ChatGPT'ye ya da Claude'a yapıştır.",
+    "copyPrompt": "ChatGPT/Claude için promptu kopyala",
     "clear": "Temizle",
     "clipboardEmpty": "Pano boş.",
     "fileTooLarge": "Bu dosya içe aktarmak için çok büyük (sınır 10 MB).",
@@ -109,7 +109,11 @@
       "answer_invalid": "Soru {question}: \"answer\" A–F arası bir harf olmalı (\"{answer}\" bulundu).",
       "answer_out_of_range": "Soru {question}: cevap “{answer}” ama yalnızca {optionCount} şık var.",
       "duplicate_id": "Soru {question}: “{id}” kimliği iki kez kullanılmış.",
-      "syntax_in_question": "Soru {question}, \"{field}\" alanı: JSON'da {line}. satır, {column}. sütunda bir hata var."
+      "syntax_in_question": "Soru {question}, \"{field}\" alanı: JSON'da {line}. satır, {column}. sütunda bir hata var.",
+      "folder_name_invalid": "Bir klasörün adı yok ya da çok uzun: {path}",
+      "folders_too_deep": "Klasörler en fazla {max} seviye iç içe olabilir.",
+      "collection_empty": "Bu dosyada hiç test yok.",
+      "collection_too_many": "Bir dosyada en fazla {max} test olabilir ({count} bulundu)."
     },
     "hint": {
       "trailing_comma": "Kapanış parantezinden önce fazladan bir virgül var.",
@@ -127,6 +131,26 @@
       "images_unsupported": "{count} soruda görsel vardı. Görseller henüz desteklenmiyor ve dahil edilmedi.",
       "backslashes_repaired": "Yapay zekânın çift yazmayı unuttuğu {count} LaTeX ters eğik çizgisini düzelttik.",
       "quotes_repaired": "Testin okunabilmesi için metinlerin içindeki {count} tırnak işaretini “ ” yaptık."
+    },
+    "allPrompts": "Tüm promptlar",
+    "collection": {
+      "summary": "{folders} klasör · {quizzes} test · {questions} soru",
+      "folderNew": "yeni",
+      "folderExisting": "var olan klasöre eklenecek",
+      "quizDuplicate": "kütüphanende zaten var, atlanacak",
+      "quizInvalid": "hatalı, atlanacak",
+      "quizWarnings": "{n} uyarı",
+      "quizWarnings_one": "{n} uyarı",
+      "questions": "{n} soru",
+      "questions_one": "{n} soru",
+      "topLevel": "En üst seviye",
+      "save": "{n} testi kaydet",
+      "save_one": "{n} testi kaydet",
+      "nothingToSave": "Kaydedilecek yeni test yok.",
+      "savedTitle": "İçe aktarıldı",
+      "saved": "{quizzes} test ve {folders} yeni klasör eklendi.",
+      "skipped": "{n} test atlandı.",
+      "skipped_one": "{n} test atlandı."
     }
   },
   "session": {
@@ -205,5 +229,11 @@
     "title": "Bir şeyler ters gitti",
     "body": "Testlerin ve ilerlemen kaydedildi.",
     "goLibrary": "Kütüphaneye git"
+  },
+  "prompts": {
+    "title": "Promptlar",
+    "intro": "ChatGPT veya Claude için hazır talimatlar. Birini kopyala, materyalinle birlikte yapay zekâya yapıştır, gelen cevabı İçe aktar ekranına yapıştır.",
+    "copy": "Kopyala",
+    "copied": "Kopyalandı. Materyalinle birlikte ChatGPT'ye ya da Claude'a yapıştır."
   }
 }
