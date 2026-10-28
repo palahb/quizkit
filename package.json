@@ -63,5 +63,6 @@
     "build:icons": "tsx scripts/build-icons.ts",
     "build:docs": "tsx scripts/build-docs.ts"
   },
-  "private": true
+  "private": true,
+  "license": "MIT"
 }
