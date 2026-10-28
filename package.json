@@ -47,6 +47,7 @@
     "jest": "^30.5.2",
     "jest-expo": "^58.0.12",
     "react-test-renderer": "^19.3.0",
+    "sharp": "^0.35.5",
     "tsx": "^4.23.15",
     "typescript": "~6.0.3"
   },
@@ -58,7 +59,8 @@
     "lint": "expo lint",
     "test": "jest",
     "typecheck": "tsc --noEmit",
-    "build:katex": "tsx scripts/build-katex-assets.ts"
+    "build:katex": "tsx scripts/build-katex-assets.ts",
+    "build:icons": "tsx scripts/build-icons.ts"
   },
   "private": true
 }
