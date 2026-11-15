@@ -52,7 +52,19 @@ A minimal quiz looks like this:
 }
 ```
 
-## Running it
+## Use it on your phone
+
+Open **https://palahb.github.io/quizkit/** and install it like an app:
+
+1. On your iPhone, open the link in Safari.
+2. Tap **Share**, then **Add to Home Screen**.
+3. Open Quizkit from the new icon.
+
+After the first load it works offline, with no account. Updates arrive automatically the next time you open the app while online.
+
+Your quizzes live only on the device, and browsers don't guarantee that stored data is kept forever. Use **Settings → Back up** every so often and keep the file somewhere safe.
+
+## Run from source
 
 Quizkit isn't on the App Store. To run it from source:
 

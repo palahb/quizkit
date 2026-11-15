@@ -52,7 +52,19 @@ En basit test şöyle görünür:
 }
 ```
 
-## Çalıştırmak
+## Telefonunda kullan
+
+**https://palahb.github.io/quizkit/** adresini aç ve uygulama gibi yükle:
+
+1. iPhone'unda bağlantıyı Safari'de aç.
+2. **Paylaş**'a, sonra **Ana Ekrana Ekle**'ye dokun.
+3. Quizkit'i yeni simgeden aç.
+
+İlk yüklemeden sonra çevrimdışı çalışır, hesap gerekmez. Güncellemeler, uygulamayı bir sonraki açışında internetteyken kendiliğinden gelir.
+
+Testlerin yalnızca cihazında durur ve tarayıcılar saklanan verinin sonsuza dek korunacağını garanti etmez. Arada bir **Ayarlar → Yedekle**'yi kullan ve dosyayı güvenli bir yerde sakla.
+
+## Kaynak koddan çalıştır
 
 Quizkit App Store'da yok. Kaynak koddan çalıştırmak için:
 
