@@ -20,13 +20,27 @@
         -webkit-text-size-adjust: 100%;
         touch-action: manipulation;
       }
+      html,
+      body {
+        background-color: #f6f7f9; /* tokens.ts light bg; the app also sets it at runtime */
+      }
+      @media (prefers-color-scheme: dark) {
+        html,
+        body {
+          background-color: #101216; /* tokens.ts dark bg */
+        }
+      }
       body {
         overflow: hidden;
       }
+      /* Fixed to the full screen so the installed app also covers the notch and home-indicator areas. */
       #root {
+        position: fixed;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
         display: flex;
-        height: 100%;
-        flex: 1;
       }
     </style>
   </head>

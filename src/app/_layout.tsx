@@ -14,6 +14,13 @@ function AppStack() {
   const theme = useTheme();
   const t = useT();
   const navTheme = theme.dark ? DarkTheme : DefaultTheme;
+  // On web the page behind the app (status bar and home-indicator areas) follows the in-app theme.
+  useEffect(() => {
+    if (Platform.OS === 'web' && typeof document !== 'undefined') {
+      document.documentElement.style.backgroundColor = theme.bg;
+      document.body.style.backgroundColor = theme.bg;
+    }
+  }, [theme.bg]);
   return (
     <ThemeProvider
       value={{
