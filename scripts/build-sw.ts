@@ -81,15 +81,16 @@ self.addEventListener('install', function (event) {
 self.addEventListener('activate', function (event) {
   event.waitUntil(
     caches.keys().then(function (keys) {
-      var ours = keys
+      // Never delete our own cache (a clock-skewed build may be older than others); keep the newest other one.
+      var others = keys
         .filter(function (key) {
-          return key.indexOf('quizkit-') === 0;
+          return key.indexOf('quizkit-') === 0 && key !== CACHE;
         })
         .sort(function (a, b) {
           return builtAtOf(b) - builtAtOf(a);
         });
       return Promise.all(
-        ours.slice(2).map(function (key) {
+        others.slice(1).map(function (key) {
           return caches.delete(key);
         })
       );

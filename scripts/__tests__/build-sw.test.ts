@@ -182,6 +182,15 @@ describe('previous build fallback', () => {
     expect(Object.keys(env.stores).sort()).toEqual(['quizkit-100-c', 'quizkit-200-b1']);
   });
 
+  it('a clock-skewed older build keeps its own cache while two newer caches exist', async () => {
+    const env = makeEnv({
+      caches: { 'quizkit-100-z': new Map(), 'quizkit-300-x': new Map(), 'quizkit-400-y': new Map() },
+    });
+    env.run(buildSw(FILES, 'z', 100));
+    await lifecycle(env.handlers.activate);
+    expect(Object.keys(env.stores).sort()).toEqual(['quizkit-100-z', 'quizkit-400-y']);
+  });
+
   it('orders builds numerically, not lexically', async () => {
     const env = makeEnv({
       caches: { 'quizkit-9-a': new Map(), 'quizkit-100-b': new Map(), 'quizkit-1000-c': new Map() },
