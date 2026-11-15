@@ -7,7 +7,7 @@ function fakeDb(): SqlDb & { closed: boolean } {
     run: async () => {},
     getAll: async () => [],
     getFirst: async () => null,
-    transaction: async <T,>(fn: () => Promise<T>) => fn(),
+    transaction: async <T,>(fn: (tx: SqlDb) => Promise<T>): Promise<T> => fn(db),
     close: async () => {
       db.closed = true;
     },

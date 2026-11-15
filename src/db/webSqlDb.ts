@@ -55,7 +55,12 @@ export async function openWebDb(opts: {
     const SQL = await initSqlJs({ locateFile: opts.locateWasm });
     const bytes = await opts.snapshots.load();
     db = new SQL.Database(bytes ?? undefined);
-    db.run('PRAGMA foreign_keys = ON');
+    try {
+      db.run('PRAGMA foreign_keys = ON');
+    } catch (e) {
+      db.close();
+      throw e;
+    }
   } catch (e) {
     lock.release?.();
     throw e;
@@ -90,7 +95,9 @@ export async function openWebDb(opts: {
     return pending;
   };
 
-  let txDepth = 0;
+  // Transactions serialize through `chain`. `active` counts queued + running transactions; statements issued on
+  // the outer handle wait until it is zero, while statements on the tx handle run immediately.
+  let active = 0;
   let chain: Promise<unknown> = Promise.resolve();
   let closed = false;
 
@@ -98,60 +105,97 @@ export async function openWebDb(opts: {
     if (params.length === 0) db.run(sql);
     else db.run(sql, params as never[]);
   };
+  const all = <T,>(sql: string, params: unknown[]): T[] => {
+    const stmt = db.prepare(sql);
+    try {
+      if (params.length) stmt.bind(params as never[]);
+      const rows: T[] = [];
+      while (stmt.step()) rows.push(stmt.getAsObject() as T);
+      return rows;
+    } finally {
+      stmt.free();
+    }
+  };
+  const first = <T,>(sql: string, params: unknown[]): T | null => {
+    const stmt = db.prepare(sql);
+    try {
+      if (params.length) stmt.bind(params as never[]);
+      return stmt.step() ? (stmt.getAsObject() as T) : null;
+    } finally {
+      stmt.free();
+    }
+  };
+  const idle = async () => {
+    while (active > 0) await chain.catch(() => undefined);
+  };
 
-  return {
+  // Handle given to a transaction callback: immediate execution, no per-statement saves, nested = reuse.
+  const txHandle: SqlDb = {
     async run(sql, params = []) {
       exec(sql, params);
-      if (txDepth === 0) await requestSave();
     },
     async getAll<T>(sql: string, params: unknown[] = []) {
-      const stmt = db.prepare(sql);
-      try {
-        if (params.length) stmt.bind(params as never[]);
-        const rows: T[] = [];
-        while (stmt.step()) rows.push(stmt.getAsObject() as T);
-        return rows;
-      } finally {
-        stmt.free();
-      }
+      return all<T>(sql, params);
     },
     async getFirst<T>(sql: string, params: unknown[] = []) {
-      const stmt = db.prepare(sql);
-      try {
-        if (params.length) stmt.bind(params as never[]);
-        return stmt.step() ? (stmt.getAsObject() as T) : null;
-      } finally {
-        stmt.free();
-      }
+      return first<T>(sql, params);
     },
-    transaction<T>(fn: () => Promise<T>): Promise<T> {
+    transaction: (fn) => fn(txHandle),
+    close: () => Promise.reject(new Error('Cannot close the database inside a transaction')),
+  };
+
+  const outer: SqlDb = {
+    async run(sql, params = []) {
+      await idle();
+      exec(sql, params);
+      await requestSave();
+    },
+    async getAll<T>(sql: string, params: unknown[] = []) {
+      await idle();
+      return all<T>(sql, params);
+    },
+    async getFirst<T>(sql: string, params: unknown[] = []) {
+      await idle();
+      return first<T>(sql, params);
+    },
+    transaction<T>(fn: (tx: SqlDb) => Promise<T>): Promise<T> {
+      active++;
       const run = async (): Promise<T> => {
-        db.run('BEGIN');
-        txDepth++;
-        let result: T;
         try {
-          result = await fn();
-        } catch (e) {
-          txDepth--;
-          db.run('ROLLBACK');
-          throw e;
+          db.run('BEGIN');
+          let result: T;
+          try {
+            result = await fn(txHandle);
+            db.run('COMMIT');
+          } catch (e) {
+            try {
+              db.run('ROLLBACK');
+            } catch {
+              // no open transaction, or already rolled back; keep the original error
+            }
+            throw e;
+          }
+          // Decrement before saving so the save is not blocked by our own gate.
+          return result;
+        } finally {
+          active--;
         }
-        txDepth--;
-        db.run('COMMIT');
-        await requestSave();
-        return result;
       };
-      const next = chain.then(run, run);
+      const next = chain.then(run, run).then(async (r) => {
+        await requestSave();
+        return r;
+      });
       chain = next.catch(() => undefined);
       return next;
     },
     async close() {
       if (closed) return;
       closed = true;
-      await chain.catch(() => undefined);
-      await (inflight ?? Promise.resolve()).catch(() => undefined);
+      await idle();
+      while (inflight || pending) await Promise.allSettled([inflight, pending]);
       db.close();
       lock.release?.();
     },
   };
+  return outer;
 }

@@ -53,9 +53,9 @@ export async function migrate(db: SqlDb): Promise<void> {
   const row = await db.getFirst<{ v: number | null }>('SELECT MAX(version) AS v FROM schema_migrations');
   const current = row?.v ?? 0;
   for (let version = current + 1; version <= MIGRATIONS.length; version++) {
-    await db.transaction(async () => {
-      await db.run(MIGRATIONS[version - 1]);
-      await db.run('INSERT INTO schema_migrations (version, applied_at) VALUES (?, ?)', [version, Date.now()]);
+    await db.transaction(async (tx) => {
+      await tx.run(MIGRATIONS[version - 1]);
+      await tx.run('INSERT INTO schema_migrations (version, applied_at) VALUES (?, ?)', [version, Date.now()]);
     });
   }
 }

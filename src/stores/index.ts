@@ -60,12 +60,12 @@ export async function initStores(): Promise<Stores> {
 export async function deleteAllData(): Promise<void> {
   const s = getStores();
   await s.session.getState().abandon();
-  await s.db.transaction(async () => {
-    await s.db.run('DELETE FROM attempts');
-    await s.db.run('DELETE FROM questions');
-    await s.db.run('DELETE FROM quizzes');
-    await s.db.run('DELETE FROM folders');
-    await s.db.run('DELETE FROM active_session');
+  await s.db.transaction(async (tx) => {
+    await tx.run('DELETE FROM attempts');
+    await tx.run('DELETE FROM questions');
+    await tx.run('DELETE FROM quizzes');
+    await tx.run('DELETE FROM folders');
+    await tx.run('DELETE FROM active_session');
   });
   await Promise.all([s.library.getState().hydrate(), s.history.getState().loadRecent(50)]);
 }

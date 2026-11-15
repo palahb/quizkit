@@ -32,10 +32,11 @@ export function createIdbSnapshotStore(dbName: string): SnapshotStore {
       const done = new Promise<void>((resolve, reject) => {
         tx.oncomplete = () => resolve();
         tx.onerror = () => reject(tx.error);
-        tx.onabort = () => reject(tx.error);
+        tx.onabort = () => reject(tx.error ?? new Error('IndexedDB transaction aborted'));
       });
-      const result = await req(fn(tx.objectStore(STORE)));
-      await done;
+      done.catch(() => undefined); // never unhandled, even if fn() throws synchronously; callers see the error below
+      const request = fn(tx.objectStore(STORE));
+      const [result] = await Promise.all([req(request), done]);
       return result;
     } finally {
       idb.close();

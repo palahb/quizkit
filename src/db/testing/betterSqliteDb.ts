@@ -6,7 +6,7 @@ import type { SqlDb } from '../sqlDb';
 export function createBetterSqliteDb(): SqlDb {
   const db = new Database(':memory:');
   db.pragma('foreign_keys = ON');
-  return {
+  const self: SqlDb = {
     async run(sql, params = []) {
       if (params.length === 0) db.exec(sql);
       else db.prepare(sql).run(...(params as never[]));
@@ -23,7 +23,7 @@ export function createBetterSqliteDb(): SqlDb {
     async transaction(fn) {
       db.exec('BEGIN');
       try {
-        const result = await fn();
+        const result = await fn(self);
         db.exec('COMMIT');
         return result;
       } catch (e) {
@@ -32,4 +32,5 @@ export function createBetterSqliteDb(): SqlDb {
       }
     },
   };
+  return self;
 }

@@ -32,8 +32,8 @@ describe('openWebDb', () => {
     await db.run('CREATE TABLE t(x)');
     const before = await store.load();
     await expect(
-      db.transaction(async () => {
-        await db.run('INSERT INTO t VALUES (1)');
+      db.transaction(async (tx) => {
+        await tx.run('INSERT INTO t VALUES (1)');
         throw new Error('boom');
       }),
     ).rejects.toThrow('boom');
@@ -84,14 +84,84 @@ describe('openWebDb', () => {
     await db.run('CREATE TABLE t(x)');
     const log: string[] = [];
     const tx = (id: string) =>
-      db.transaction(async () => {
+      db.transaction(async (tx) => {
         log.push(`${id}:start`);
-        await db.run('INSERT INTO t VALUES (?)', [id]);
+        await tx.run('INSERT INTO t VALUES (?)', [id]);
         await new Promise((r) => setTimeout(r, 10));
         log.push(`${id}:end`);
       });
     await Promise.all([tx('a'), tx('b')]);
     expect(log).toEqual(['a:start', 'a:end', 'b:start', 'b:end']);
     await db.close();
+  });
+
+  it('outside statements wait for a pending transaction and are not rolled back with it', async () => {
+    const store = createIdbSnapshotStore(uniq());
+    const db = await open(store);
+    await db.run('CREATE TABLE t(x)');
+    const tx = db.transaction(async (h) => {
+      await h.run('INSERT INTO t VALUES (1)');
+      await new Promise((r) => setTimeout(r, 20));
+      throw new Error('boom');
+    });
+    const outside = db.run('INSERT INTO t VALUES (2)');
+    await expect(tx).rejects.toThrow('boom');
+    await outside;
+    expect(await db.getAll('SELECT x FROM t')).toEqual([{ x: 2 }]);
+    await db.close();
+    const again = await open(store);
+    expect(await again.getAll('SELECT x FROM t')).toEqual([{ x: 2 }]);
+    await again.close();
+  });
+
+  it('nested transaction reuses the open one and does not hang', async () => {
+    const db = await open(createIdbSnapshotStore(uniq()));
+    await db.run('CREATE TABLE t(x)');
+    await db.transaction(async (tx) => {
+      await tx.transaction(async (inner) => {
+        await inner.run('INSERT INTO t VALUES (1)');
+      });
+    });
+    expect(await db.getAll('SELECT x FROM t')).toEqual([{ x: 1 }]);
+    await db.close();
+  });
+
+  it('rolls back and recovers when COMMIT fails', async () => {
+    const db = await open(createIdbSnapshotStore(uniq()));
+    await db.run('CREATE TABLE p(id PRIMARY KEY)');
+    await db.run('CREATE TABLE c(pid REFERENCES p(id))');
+    await expect(
+      db.transaction(async (tx) => {
+        await tx.run('PRAGMA defer_foreign_keys = ON');
+        await tx.run('INSERT INTO c VALUES (99)');
+      }),
+    ).rejects.toThrow();
+    expect(await db.getAll('SELECT * FROM c')).toEqual([]);
+    await db.transaction(async (tx) => {
+      await tx.run('INSERT INTO p VALUES (1)');
+    });
+    expect(await db.getAll('SELECT id FROM p')).toEqual([{ id: 1 }]);
+    await db.close();
+  });
+});
+
+describe('createIdbSnapshotStore errors', () => {
+  it('save rejects once when the write fails, with no unhandled rejection', async () => {
+    const seen: unknown[] = [];
+    const onUnhandled = (e: unknown) => seen.push(e);
+    process.on('unhandledRejection', onUnhandled);
+    const store = createIdbSnapshotStore(uniq());
+    const spy = jest.spyOn(IDBObjectStore.prototype, 'put').mockImplementation(function (this: IDBObjectStore) {
+      this.transaction.abort();
+      throw new DOMException('quota', 'QuotaExceededError');
+    });
+    try {
+      await expect(store.save(new Uint8Array([1]))).rejects.toBeDefined();
+      await new Promise((r) => setTimeout(r, 50));
+    } finally {
+      spy.mockRestore();
+      process.off('unhandledRejection', onUnhandled);
+    }
+    expect(seen).toEqual([]);
   });
 });

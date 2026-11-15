@@ -14,7 +14,7 @@ export async function openExpoDb(name = 'quizkit.db'): Promise<SqlDb> {
     await db.closeAsync().catch(() => undefined);
     throw e;
   }
-  return {
+  const self: SqlDb = {
     close: () => db.closeAsync(),
     async run(sql, params = []) {
       if (params.length === 0) await db.execAsync(sql);
@@ -25,9 +25,10 @@ export async function openExpoDb(name = 'quizkit.db'): Promise<SqlDb> {
     async transaction(fn) {
       let result!: Awaited<ReturnType<typeof fn>>;
       await db.withTransactionAsync(async () => {
-        result = await fn();
+        result = await fn(self);
       });
       return result;
     },
   };
+  return self;
 }
