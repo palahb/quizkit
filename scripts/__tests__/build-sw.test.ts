@@ -17,7 +17,12 @@ function makeEnv(opts: { failPath?: string; caches?: Record<string, Map<string, 
         put: async (req: any, res: any) => {
           store.set(typeof req === 'string' ? req : req.url, res);
         },
-        match: async (req: any) => store.get(typeof req === 'string' ? req : req.url),
+        match: async (req: any, o?: { ignoreSearch?: boolean }) => {
+          const k = typeof req === 'string' ? req : req.url;
+          if (!o?.ignoreSearch) return store.get(k);
+          for (const [sk, v] of store) if (sk.split('?')[0] === k.split('?')[0]) return v;
+          return undefined;
+        },
       };
     },
     keys: async () => Object.keys(stores),
@@ -75,9 +80,9 @@ describe('computeBuildId', () => {
 
 describe('buildSw source', () => {
   it('contains every file path and the build id', () => {
-    const src = buildSw(FILES, 'abc123');
+    const src = buildSw(FILES, 'abc123', 100);
     for (const f of FILES) expect(src).toContain(JSON.stringify(f));
-    expect(src).toContain('quizkit-abc123');
+    expect(src).toContain('quizkit-100-abc123');
     expect(src).not.toContain('"sw.js"');
   });
 });
@@ -85,26 +90,26 @@ describe('buildSw source', () => {
 describe('generated service worker', () => {
   it('precaches everything with cache: reload then skipWaiting', async () => {
     const env = makeEnv();
-    env.run(buildSw(FILES, 'b1'));
+    env.run(buildSw(FILES, 'b1', 200));
     await lifecycle(env.handlers.install);
     expect(env.calls.skipWaiting).toBe(1);
     expect(env.fetchCalls).toHaveLength(FILES.length);
     for (const c of env.fetchCalls) expect(c.init).toEqual({ cache: 'reload' });
     expect(env.fetchCalls.map((c) => c.url)).toContain(SCOPE + 'index.html');
     expect(env.fetchCalls.map((c) => c.url)).toContain(SCOPE);
-    expect(Object.keys(env.stores)).toEqual(['quizkit-b1']);
+    expect(Object.keys(env.stores)).toEqual(['quizkit-200-b1']);
   });
 
   it('fails install and does not skipWaiting if one fetch is not ok', async () => {
     const env = makeEnv({ failPath: 'manifest.webmanifest' });
-    env.run(buildSw(FILES, 'b1'));
+    env.run(buildSw(FILES, 'b1', 200));
     await expect(lifecycle(env.handlers.install)).rejects.toThrow();
     expect(env.calls.skipWaiting).toBe(0);
   });
 
   it('answers navigations from cached index.html', async () => {
     const env = makeEnv();
-    env.run(buildSw(FILES, 'b1'));
+    env.run(buildSw(FILES, 'b1', 200));
     await lifecycle(env.handlers.install);
     const f = fetchEvent('https://example.com/quizkit/quiz/x', 'GET', 'navigate');
     env.handlers.fetch(f.event);
@@ -115,7 +120,7 @@ describe('generated service worker', () => {
 
   it('serves other precached files cache-first and falls through on miss', async () => {
     const env = makeEnv();
-    env.run(buildSw(FILES, 'b1'));
+    env.run(buildSw(FILES, 'b1', 200));
     await lifecycle(env.handlers.install);
     const before = env.fetchCalls.length;
     const hit = fetchEvent(SCOPE + 'manifest.webmanifest');
@@ -126,12 +131,12 @@ describe('generated service worker', () => {
     env.handlers.fetch(miss.event);
     expect((await miss.response()).url).toBe(SCOPE + 'unknown.png');
     expect(env.fetchCalls.length).toBe(before + 1);
-    expect(env.stores['quizkit-b1'].has(SCOPE + 'unknown.png')).toBe(false);
+    expect(env.stores['quizkit-200-b1'].has(SCOPE + 'unknown.png')).toBe(false);
   });
 
   it('does not intercept POST, cross-origin, or out-of-scope requests', async () => {
     const env = makeEnv();
-    env.run(buildSw(FILES, 'b1'));
+    env.run(buildSw(FILES, 'b1', 200));
     await lifecycle(env.handlers.install);
     for (const f of [
       fetchEvent(SCOPE + 'quiz/x', 'POST', 'navigate'),
@@ -143,11 +148,64 @@ describe('generated service worker', () => {
     }
   });
 
-  it('activate deletes older quizkit-* caches, keeps current and foreign ones, then claims', async () => {
-    const env = makeEnv({ caches: { 'quizkit-old': new Map(), 'quizkit-b1': new Map(), other: new Map() } });
-    env.run(buildSw(FILES, 'b1'));
+  it('activate keeps current + previous, ignores foreign caches, then claims', async () => {
+    const env = makeEnv({ caches: { 'quizkit-100-old': new Map(), 'quizkit-200-b1': new Map(), other: new Map() } });
+    env.run(buildSw(FILES, 'b1', 200));
     await lifecycle(env.handlers.activate);
-    expect(Object.keys(env.stores).sort()).toEqual(['other', 'quizkit-b1']);
+    expect(Object.keys(env.stores).sort()).toEqual(['other', 'quizkit-100-old', 'quizkit-200-b1']);
     expect(env.calls.claim).toBe(1);
+  });
+});
+
+describe('previous build fallback', () => {
+  const OLD_CHUNK = SCOPE + '_expo/static/js/web/old-chunk-1.js';
+
+  it('answers an old-build chunk from the previous cache without network', async () => {
+    const prev = new Map<string, any>([[OLD_CHUNK, { ok: true, url: OLD_CHUNK }]]);
+    const env = makeEnv({ caches: { 'quizkit-100-a': prev } });
+    env.run(buildSw(FILES, 'b2', 200));
+    await lifecycle(env.handlers.install);
+    await lifecycle(env.handlers.activate);
+    const before = env.fetchCalls.length;
+    const f = fetchEvent(OLD_CHUNK);
+    env.handlers.fetch(f.event);
+    expect((await f.response()).url).toBe(OLD_CHUNK);
+    expect(env.fetchCalls.length).toBe(before);
+  });
+
+  it('activate keeps only current + newest previous of several older caches', async () => {
+    const env = makeEnv({
+      caches: { 'quizkit-50-a': new Map(), 'quizkit-90-b': new Map(), 'quizkit-100-c': new Map(), 'quizkit-200-b1': new Map() },
+    });
+    env.run(buildSw(FILES, 'b1', 200));
+    await lifecycle(env.handlers.activate);
+    expect(Object.keys(env.stores).sort()).toEqual(['quizkit-100-c', 'quizkit-200-b1']);
+  });
+
+  it('orders builds numerically, not lexically', async () => {
+    const env = makeEnv({
+      caches: { 'quizkit-9-a': new Map(), 'quizkit-100-b': new Map(), 'quizkit-1000-c': new Map() },
+    });
+    env.run(buildSw(FILES, 'c', 1000));
+    await lifecycle(env.handlers.activate);
+    expect(Object.keys(env.stores).sort()).toEqual(['quizkit-100-b', 'quizkit-1000-c']);
+  });
+
+  it('ignores the query string for cache hits', async () => {
+    const env = makeEnv();
+    env.run(buildSw(FILES, 'b1', 200));
+    await lifecycle(env.handlers.install);
+    const before = env.fetchCalls.length;
+    const f = fetchEvent(SCOPE + 'manifest.webmanifest?v=1');
+    env.handlers.fetch(f.event);
+    expect((await f.response()).url).toBe(SCOPE + 'manifest.webmanifest');
+    expect(env.fetchCalls.length).toBe(before);
+  });
+
+  it('failed install leaves no new cache behind', async () => {
+    const env = makeEnv({ failPath: 'manifest.webmanifest', caches: { 'quizkit-100-a': new Map() } });
+    env.run(buildSw(FILES, 'b2', 200));
+    await expect(lifecycle(env.handlers.install)).rejects.toThrow();
+    expect(Object.keys(env.stores)).toEqual(['quizkit-100-a']);
   });
 });
