@@ -7,6 +7,7 @@ import sharp from 'sharp';
 const root = join(__dirname, '..');
 const brand = (f: string) => readFileSync(join(root, 'assets', 'branding', f));
 const out = (f: string) => join(root, 'assets', 'images', f);
+const pub = (f: string) => join(root, 'public', f);
 
 const BLUE = '#2463EB';
 
@@ -35,7 +36,19 @@ async function main() {
 
   // Splash: the white mark on transparent; the blue comes from the splash backgroundColor.
   await (await inset(1)).toFile(out('splash-icon.png'));
-  console.log('icons written to assets/images');
+  // PWA icons (served from public/): full-bleed squares, no transparency.
+  const full = () => sharp(brand('icon.svg'), { density: 300 });
+  await full().resize(180, 180).flatten({ background: BLUE }).removeAlpha().png().toFile(pub('apple-touch-icon.png'));
+  await full().resize(192, 192).flatten({ background: BLUE }).removeAlpha().png().toFile(pub('icon-192.png'));
+  await full().resize(512, 512).flatten({ background: BLUE }).removeAlpha().png().toFile(pub('icon-512.png'));
+  // Maskable: the mark inset to ~0.78 on solid blue so the OS mask never crops it.
+  const mark = await sharp(brand('mark.svg'), { density: 300 }).resize(Math.round(512 * 0.78), Math.round(512 * 0.78)).png().toBuffer();
+  await sharp({ create: { width: 512, height: 512, channels: 3, background: BLUE } })
+    .composite([{ input: mark, gravity: 'centre' }])
+    .removeAlpha()
+    .png()
+    .toFile(pub('icon-512-maskable.png'));
+  console.log('icons written to assets/images and public');
 }
 
 main().catch((e) => {

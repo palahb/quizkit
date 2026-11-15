@@ -23,7 +23,11 @@
     },
     "web": {
       "favicon": "./assets/images/favicon.png",
-      "output": "single"
+      "output": "single",
+      "name": "Quizkit",
+      "shortName": "Quizkit",
+      "backgroundColor": "#2463EB",
+      "themeColor": "#2463EB"
     },
     "plugins": [
       "expo-router",

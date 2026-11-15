@@ -3,6 +3,7 @@ import { showAlert } from '@/components/alert';
 
 import { Button, Card, Segmented, Screen, T } from '@/components/ui';
 import { BackupSection } from '@/features/settings/BackupSection';
+import { InstallHint } from '@/features/settings/InstallHint';
 import { useT } from '@/hooks/useT';
 import { deleteAllData, useSettingsStore } from '@/stores';
 import type { Language, ThemeSetting } from '@/stores/settingsStore';
@@ -49,6 +50,7 @@ export default function SettingsScreen() {
         <T variant="heading">{t('settings.data')}</T>
         <Button label={t('settings.deleteAll')} kind="danger" onPress={confirmDeleteAll} />
       </Card>
+      {Platform.OS === 'web' ? <InstallHint /> : null}
       {Platform.OS === 'web' ? <BackupSection /> : null}
       <T variant="small">{t('settings.about')}</T>
     </Screen>

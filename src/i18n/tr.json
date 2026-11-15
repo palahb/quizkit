@@ -218,6 +218,11 @@
     "deleteAll": "Tüm verileri sil",
     "deleteAllConfirm": "Bu cihazdaki tüm klasörler, testler ve sonuçlar silinsin mi? Bu geri alınamaz.",
     "about": "Quizkit tamamen çevrimdışı çalışır. İçe aktardığın ve cevapladığın hiçbir şey bu cihazdan çıkmaz.",
+    "install": {
+      "title": "Yükle",
+      "body": "Quizkit verileri tarayıcında saklanır ve Safari kullanılmayan uygulamaların verilerini silebilir. Testlerini ve sonuçlarını korumak için uygulamayı yükle.",
+      "steps": "Safari'de: Paylaş → Ana Ekrana Ekle."
+    },
     "backup": {
       "title": "Yedek",
       "hint": "Her şeyi (klasörler, testler, sonuçlar) bir dosyaya kaydet veya bu cihazdaki verileri bir dosyadan değiştir. Devam eden test yedeğe dahil değildir.",
@@ -231,6 +236,7 @@
     }
   },
   "app": {
+    "openElsewhere": "Quizkit başka bir pencerede veya sekmede zaten açık. Diğerini kapatıp sayfayı yenile.",
     "loadError": "Quizkit verilerini açamadı.",
     "retry": "Tekrar dene",
     "resetData": "Uygulama verilerini sıfırla",
