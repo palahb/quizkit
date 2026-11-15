@@ -217,7 +217,18 @@
     "data": "Veriler",
     "deleteAll": "Tüm verileri sil",
     "deleteAllConfirm": "Bu cihazdaki tüm klasörler, testler ve sonuçlar silinsin mi? Bu geri alınamaz.",
-    "about": "Quizkit tamamen çevrimdışı çalışır. İçe aktardığın ve cevapladığın hiçbir şey bu cihazdan çıkmaz."
+    "about": "Quizkit tamamen çevrimdışı çalışır. İçe aktardığın ve cevapladığın hiçbir şey bu cihazdan çıkmaz.",
+    "backup": {
+      "title": "Yedek",
+      "hint": "Her şeyi (klasörler, testler, sonuçlar) bir dosyaya kaydet veya bu cihazdaki verileri bir dosyadan değiştir. Devam eden test yedeğe dahil değildir.",
+      "export": "Yedekle",
+      "exportError": "Yedek oluşturulamadı.",
+      "restore": "Geri yükle",
+      "restoreConfirm": "Mevcut TÜM veriler yedekle değiştirilsin mi? Yedekte {{quizzes}} test ve {{attempts}} sonuç var. Bu geri alınamaz.",
+      "restored": "Yedek geri yüklendi.",
+      "invalid": "Bu dosya geçerli bir Quizkit yedeği değil.",
+      "restoreError": "Yedek geri yüklenemedi. Verilerin değişmedi."
+    }
   },
   "app": {
     "loadError": "Quizkit verilerini açamadı.",

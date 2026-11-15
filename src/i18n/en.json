@@ -217,7 +217,18 @@
     "data": "Data",
     "deleteAll": "Delete all data",
     "deleteAllConfirm": "Delete every folder, quiz and result on this device? This cannot be undone.",
-    "about": "Quizkit works fully offline. Nothing you import or answer leaves this device."
+    "about": "Quizkit works fully offline. Nothing you import or answer leaves this device.",
+    "backup": {
+      "title": "Backup",
+      "hint": "Save everything (folders, quizzes, results) to a file, or replace this device's data from one. The quiz in progress is not included.",
+      "export": "Back up",
+      "exportError": "Could not create the backup.",
+      "restore": "Restore",
+      "restoreConfirm": "Replace ALL current data with the backup? It contains {{quizzes}} quizzes and {{attempts}} results. This cannot be undone.",
+      "restored": "Backup restored.",
+      "invalid": "This file is not a valid Quizkit backup.",
+      "restoreError": "Could not restore the backup. Your data is unchanged."
+    }
   },
   "app": {
     "loadError": "Quizkit could not open its data.",
