@@ -1,10 +1,10 @@
 import initSqlJs, { type Database } from 'sql.js';
 
-import { DatabaseLockedError } from './errors';
+import { DatabaseLockedError, SnapshotSaveError, StorageUnavailableError } from './errors';
 import type { SqlDb } from './sqlDb';
 import type { SnapshotStore } from './webSnapshotStore';
 
-export { DatabaseLockedError };
+export { DatabaseLockedError, SnapshotSaveError, StorageUnavailableError };
 
 export interface WebLock {
   acquire(name: string): Promise<boolean>;
@@ -48,8 +48,14 @@ export async function openWebDb(opts: {
 
   let db: Database;
   try {
-    const SQL = await initSqlJs({ locateFile: opts.locateWasm });
-    const bytes = await opts.snapshots.load();
+    let SQL: Awaited<ReturnType<typeof initSqlJs>>;
+    let bytes: Uint8Array | null;
+    try {
+      SQL = await initSqlJs({ locateFile: opts.locateWasm });
+      bytes = await opts.snapshots.load();
+    } catch (e) {
+      throw new StorageUnavailableError(e);
+    }
     db = new SQL.Database(bytes ?? undefined);
     try {
       db.run('PRAGMA foreign_keys = ON');
@@ -65,7 +71,9 @@ export async function openWebDb(opts: {
   // Coalescing save queue: one in flight, one pending; callers share the outcome of the save they wait on.
   let inflight: Promise<void> | null = null;
   let pending: Promise<void> | null = null;
+  let running: Promise<void> | null = null; // the open transaction callback, if any
   const doSave = async () => {
+    while (running) await running; // never export while a transaction is open
     const bytes = db.export();
     db.run('PRAGMA foreign_keys = ON'); // export() resets connection pragmas
     await opts.snapshots.save(bytes);
@@ -121,6 +129,14 @@ export async function openWebDb(opts: {
       stmt.free();
     }
   };
+  // Detects whether a transaction changed anything: row changes or schema (DDL) changes.
+  const fingerprint = (): string => {
+    const r = first<{ c: number; s: number }>(
+      'SELECT total_changes() AS c, (SELECT schema_version FROM pragma_schema_version) AS s',
+      [],
+    );
+    return `${r?.c}:${r?.s}`;
+  };
   const idle = async () => {
     while (active > 0) await chain.catch(() => undefined);
   };
@@ -156,8 +172,13 @@ export async function openWebDb(opts: {
     },
     transaction<T>(fn: (tx: SqlDb) => Promise<T>): Promise<T> {
       active++;
-      const run = async (): Promise<T> => {
+      const run = async (): Promise<{ result: T; changed: boolean }> => {
+        let done!: () => void;
+        running = new Promise<void>((r) => {
+          done = r;
+        });
         try {
+          const before = fingerprint();
           db.run('BEGIN');
           let result: T;
           try {
@@ -172,14 +193,22 @@ export async function openWebDb(opts: {
             throw e;
           }
           // Decrement before saving so the save is not blocked by our own gate.
-          return result;
+          return { result, changed: fingerprint() !== before };
         } finally {
           active--;
+          running = null;
+          done();
         }
       };
       const next = chain.then(run, run).then(async (r) => {
-        await requestSave();
-        return r;
+        if (r.changed) {
+          try {
+            await requestSave();
+          } catch (e) {
+            throw new SnapshotSaveError(e);
+          }
+        }
+        return r.result;
       });
       chain = next.catch(() => undefined);
       return next;

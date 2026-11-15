@@ -220,7 +220,7 @@
     "about": "Quizkit works fully offline. Nothing you import or answer leaves this device.",
     "install": {
       "title": "Install",
-      "body": "Quizkit is stored in your browser, and Safari can clear that data when the app goes unused. Install it to protect your quizzes and results.",
+      "body": "Install first, then import. Quizkit is stored in your browser, and Safari can clear that data when the app goes unused. Data added in a Safari tab does not move into the installed app: to move it, use Back up in Safari and Restore in the installed app.",
       "steps": "In Safari: Share → Add to Home Screen."
     },
     "backup": {
@@ -232,12 +232,14 @@
       "restoreConfirm": "Replace ALL current data with the backup? It contains {quizzes} quizzes and {attempts} results. This cannot be undone.",
       "restored": "Backup restored.",
       "invalid": "This file is not a valid Quizkit backup.",
-      "restoreError": "Could not restore the backup. Your data is unchanged."
+      "restoreError": "Could not restore the backup. Your data is unchanged.",
+      "restoreNotSaved": "The backup was restored in memory but could not be saved to storage. Reload the app and check your library."
     }
   },
   "app": {
     "openElsewhere": "Quizkit is already open in another window or tab. Close the other one and reload.",
     "loadError": "Quizkit could not open its data.",
+    "storageUnavailable": "Quizkit could not reach its storage. Check your connection, then try again.",
     "retry": "Try again",
     "resetData": "Reset app data",
     "resetConfirm": "This deletes all quizzes and results on this device. Continue?"

@@ -6,6 +6,9 @@ import { migrate } from '../migrations';
 import { openMigrated } from '../openDatabase';
 import type { SnapshotStore } from '../webSnapshotStore';
 import { createIdbSnapshotStore } from '../webSnapshotStore';
+import initSqlJs from 'sql.js';
+
+import { SnapshotSaveError, StorageUnavailableError } from '../errors';
 import { DatabaseLockedError, openWebDb } from '../webSqlDb';
 
 const locateWasm = (file: string) => path.join(path.dirname(require.resolve('sql.js')), file);
@@ -142,6 +145,142 @@ describe('openWebDb', () => {
     });
     expect(await db.getAll('SELECT id FROM p')).toEqual([{ id: 1 }]);
     await db.close();
+  });
+});
+
+describe('openWebDb snapshots', () => {
+  const spied = (inner: SnapshotStore, delayFirst = 0) => {
+    const saved: Uint8Array[] = [];
+    let n = 0;
+    const store: SnapshotStore = {
+      load: () => inner.load(),
+      delete: () => inner.delete(),
+      save: async (b) => {
+        saved.push(b);
+        if (n++ === 0 && delayFirst) await new Promise((r) => setTimeout(r, delayFirst));
+        await inner.save(b);
+      },
+    };
+    return { store, saved };
+  };
+
+  it('does not save after a transaction that changed nothing', async () => {
+    const { store, saved } = spied(createIdbSnapshotStore(uniq()));
+    const db = await open(store);
+    await db.run('CREATE TABLE t(x)');
+    const count = saved.length;
+    expect(await db.transaction(async (tx) => tx.getAll('SELECT x FROM t'))).toEqual([]);
+    expect(saved.length).toBe(count);
+    await db.close();
+  });
+
+  it('saves after a transaction that only changed the schema or rows', async () => {
+    const { store, saved } = spied(createIdbSnapshotStore(uniq()));
+    const db = await open(store);
+    await db.transaction(async (tx) => tx.run('CREATE TABLE t(x)'));
+    expect(saved.length).toBe(1);
+    await db.transaction(async (tx) => tx.run('INSERT INTO t VALUES (1)'));
+    expect(saved.length).toBe(2);
+    await db.close();
+  });
+
+  it('wraps a failing post-commit save in SnapshotSaveError, data stays in memory', async () => {
+    let fail = false;
+    const inner = createIdbSnapshotStore(uniq());
+    const store: SnapshotStore = {
+      load: () => inner.load(),
+      delete: () => inner.delete(),
+      save: async (b) => {
+        if (fail) throw new Error('quota');
+        await inner.save(b);
+      },
+    };
+    const db = await open(store);
+    await db.run('CREATE TABLE t(x)');
+    fail = true;
+    await expect(db.transaction(async (tx) => tx.run('INSERT INTO t VALUES (1)'))).rejects.toBeInstanceOf(
+      SnapshotSaveError,
+    );
+    expect(await db.getAll('SELECT x FROM t')).toEqual([{ x: 1 }]);
+    fail = false;
+    await db.close();
+  });
+
+  it('a queued save never exports during an open transaction', async () => {
+    const { store, saved } = spied(createIdbSnapshotStore(uniq()), 30);
+    const db = await open(store);
+    await db.run('CREATE TABLE t(x)');
+    saved.length = 0;
+    const p1 = db.run('INSERT INTO t VALUES (1)'); // first save is slow
+    await new Promise((r) => setTimeout(r, 0));
+    const p2 = db.run('INSERT INTO t VALUES (2)'); // queues a pending save behind it
+    await new Promise((r) => setTimeout(r, 0));
+    const tx = db.transaction(async (h) => {
+      await h.run('INSERT INTO t VALUES (99)');
+      await new Promise((r) => setTimeout(r, 80)); // the pending save becomes due meanwhile
+      throw new Error('rollback');
+    });
+    await expect(tx).rejects.toThrow('rollback');
+    await Promise.all([p1, p2]);
+    await db.close();
+    const SQL = await initSqlJs({ locateFile: locateWasm });
+    for (const bytes of saved) {
+      const snap = new SQL.Database(bytes);
+      const rows = snap.exec('SELECT x FROM t')[0]?.values.flat() ?? [];
+      expect(rows).not.toContain(99);
+      snap.close();
+    }
+  });
+});
+
+describe('openWebDb storage failures', () => {
+  it('reports StorageUnavailableError when the snapshot cannot be loaded, and releases the lock', async () => {
+    const release = jest.fn();
+    const store: SnapshotStore = {
+      load: async () => {
+        throw new Error('idb blocked');
+      },
+      save: async () => undefined,
+      delete: async () => undefined,
+    };
+    await expect(open(store, { lock: { acquire: async () => true, release } })).rejects.toBeInstanceOf(
+      StorageUnavailableError,
+    );
+    expect(release).toHaveBeenCalled();
+  });
+
+  it('reports StorageUnavailableError when the wasm cannot be loaded', async () => {
+    const store = createIdbSnapshotStore(uniq());
+    let fresh!: typeof import('../webSqlDb');
+    let FreshErr!: typeof import('../errors');
+    jest.isolateModules(() => {
+      jest.doMock('sql.js', () => ({ __esModule: true, default: () => Promise.reject(new Error('wasm 404')) }));
+      fresh = require('../webSqlDb');
+      FreshErr = require('../errors');
+    });
+    await expect(
+      fresh.openWebDb({
+        name: 'q',
+        snapshots: store,
+        locateWasm,
+        lock: { acquire: async () => true },
+      }),
+    ).rejects.toBeInstanceOf(FreshErr.StorageUnavailableError);
+    jest.dontMock('sql.js');
+  });
+
+  it('a corrupt snapshot is not a StorageUnavailableError', async () => {
+    const store: SnapshotStore = {
+      load: async () => new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]),
+      save: async () => undefined,
+      delete: async () => undefined,
+    };
+    const err = await open(store).then(
+      () => null,
+      (e) => e,
+    );
+    // Either opens lazily (no error) or fails as a plain error; never "storage unavailable".
+    if (err) expect(err).not.toBeInstanceOf(StorageUnavailableError);
   });
 });
 

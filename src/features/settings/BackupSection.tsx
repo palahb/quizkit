@@ -3,9 +3,12 @@ import * as DocumentPicker from 'expo-document-picker';
 import { showAlert } from '@/components/alert';
 import { Button, Card, T } from '@/components/ui';
 import { BackupInvalidError, exportBackup, restoreBackup } from '@/db/backupRepo';
+import { SnapshotSaveError } from '@/db/errors';
 import { readTextFile } from '@/features/import/readFile';
 import { useT } from '@/hooks/useT';
 import { getStores } from '@/stores';
+
+import { shareOrDownload } from './shareBackup';
 
 function backupFileName(): string {
   return `quizkit-backup-${new Date().toISOString().slice(0, 10)}.json`;
@@ -21,36 +24,46 @@ export function BackupSection() {
       const name = backupFileName();
       const blob = new Blob([JSON.stringify(backup)], { type: 'application/json' });
       const file = new File([blob], name, { type: 'application/json' });
-      if (navigator.canShare?.({ files: [file] })) {
-        try {
-          await navigator.share({ files: [file] });
-        } catch (e) {
-          if ((e as { name?: string }).name !== 'AbortError') throw e;
-        }
-        return;
-      }
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = name;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      await shareOrDownload({
+        canShare: navigator.canShare?.({ files: [file] }) === true,
+        share: () => navigator.share({ files: [file] }),
+        download: () => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = name;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        },
+      });
     } catch {
       showAlert('', t('settings.backup.exportError'));
     }
   };
 
   const applyRestore = async (raw: unknown) => {
+    let message = t('settings.backup.restored');
     try {
       await restoreBackup(getStores().db, raw);
-      const s = getStores();
-      await Promise.all([s.library.getState().hydrate(), s.history.getState().loadRecent(50), s.session.getState().hydrate()]);
-      showAlert('', t('settings.backup.restored'));
     } catch (e) {
-      showAlert('', e instanceof BackupInvalidError ? t('settings.backup.invalid') : t('settings.backup.restoreError'));
+      message =
+        e instanceof BackupInvalidError
+          ? t('settings.backup.invalid')
+          : e instanceof SnapshotSaveError
+            ? t('settings.backup.restoreNotSaved') // committed in memory, storage write failed
+            : t('settings.backup.restoreError'); // rejected before commit, data unchanged
+    } finally {
+      // Always show what the database holds now, whatever the outcome.
+      const s = getStores();
+      await Promise.all([
+        s.library.getState().hydrate(),
+        s.history.getState().loadRecent(50),
+        s.session.getState().hydrate(),
+      ]).catch(() => undefined);
     }
+    showAlert('', message);
   };
 
   const restore = async () => {

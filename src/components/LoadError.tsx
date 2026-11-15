@@ -25,11 +25,12 @@ export function LoadError({ onRetry, error }: { onRetry: () => void; error: unkn
         },
       },
     ]);
-  // Another window may still be writing the database: never offer to delete it then.
-  const canReset = loadErrorKey(error) !== 'app.openElsewhere';
+  // Never offer to delete data that is merely locked by another window or that could not be loaded at all.
+  const key = loadErrorKey(error);
+  const canReset = key === 'app.loadError';
   return (
     <Screen edges={['top', 'left', 'right', 'bottom']}>
-      <T variant="heading">{tr(loadErrorKey(error))}</T>
+      <T variant="heading">{tr(key)}</T>
       <Button label={tr('app.retry')} onPress={onRetry} />
       {canReset ? <Button label={tr('app.resetData')} kind="danger" onPress={reset} /> : null}
     </Screen>

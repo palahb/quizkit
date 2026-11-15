@@ -220,7 +220,7 @@
     "about": "Quizkit tamamen çevrimdışı çalışır. İçe aktardığın ve cevapladığın hiçbir şey bu cihazdan çıkmaz.",
     "install": {
       "title": "Yükle",
-      "body": "Quizkit verileri tarayıcında saklanır ve Safari kullanılmayan uygulamaların verilerini silebilir. Testlerini ve sonuçlarını korumak için uygulamayı yükle.",
+      "body": "Önce yükle, sonra içe aktar. Quizkit verileri tarayıcında saklanır ve Safari kullanılmayan uygulamaların verilerini silebilir. Safari sekmesinde eklediğin veriler yüklenen uygulamaya geçmez: taşımak için Safari'de Yedekle'yi, yüklenen uygulamada Geri yükle'yi kullan.",
       "steps": "Safari'de: Paylaş → Ana Ekrana Ekle."
     },
     "backup": {
@@ -232,12 +232,14 @@
       "restoreConfirm": "Mevcut TÜM veriler yedekle değiştirilsin mi? Yedekte {quizzes} test ve {attempts} sonuç var. Bu geri alınamaz.",
       "restored": "Yedek geri yüklendi.",
       "invalid": "Bu dosya geçerli bir Quizkit yedeği değil.",
-      "restoreError": "Yedek geri yüklenemedi. Verilerin değişmedi."
+      "restoreError": "Yedek geri yüklenemedi. Verilerin değişmedi.",
+      "restoreNotSaved": "Yedek bellekte geri yüklendi ama depolamaya kaydedilemedi. Uygulamayı yeniden yükle ve kitaplığını kontrol et."
     }
   },
   "app": {
     "openElsewhere": "Quizkit başka bir pencerede veya sekmede zaten açık. Diğerini kapatıp sayfayı yenile.",
     "loadError": "Quizkit verilerini açamadı.",
+    "storageUnavailable": "Quizkit depolamasına ulaşamadı. Bağlantını kontrol edip tekrar dene.",
     "retry": "Tekrar dene",
     "resetData": "Uygulama verilerini sıfırla",
     "resetConfirm": "Bu, cihazdaki tüm testleri ve sonuçları siler. Devam edilsin mi?"
