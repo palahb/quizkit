@@ -224,7 +224,7 @@
       "export": "Yedekle",
       "exportError": "Yedek oluşturulamadı.",
       "restore": "Geri yükle",
-      "restoreConfirm": "Mevcut TÜM veriler yedekle değiştirilsin mi? Yedekte {{quizzes}} test ve {{attempts}} sonuç var. Bu geri alınamaz.",
+      "restoreConfirm": "Mevcut TÜM veriler yedekle değiştirilsin mi? Yedekte {quizzes} test ve {attempts} sonuç var. Bu geri alınamaz.",
       "restored": "Yedek geri yüklendi.",
       "invalid": "Bu dosya geçerli bir Quizkit yedeği değil.",
       "restoreError": "Yedek geri yüklenemedi. Verilerin değişmedi."

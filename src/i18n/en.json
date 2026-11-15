@@ -224,7 +224,7 @@
       "export": "Back up",
       "exportError": "Could not create the backup.",
       "restore": "Restore",
-      "restoreConfirm": "Replace ALL current data with the backup? It contains {{quizzes}} quizzes and {{attempts}} results. This cannot be undone.",
+      "restoreConfirm": "Replace ALL current data with the backup? It contains {quizzes} quizzes and {attempts} results. This cannot be undone.",
       "restored": "Backup restored.",
       "invalid": "This file is not a valid Quizkit backup.",
       "restoreError": "Could not restore the backup. Your data is unchanged."
