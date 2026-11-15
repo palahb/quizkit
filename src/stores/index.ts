@@ -1,10 +1,7 @@
 import { getLocales } from 'expo-localization';
-import KvStorage from 'expo-sqlite/kv-store';
-import { deleteDatabaseAsync } from 'expo-sqlite';
 import { useStore } from 'zustand';
 
 import { createAttemptRepo } from '@/db/attemptRepo';
-import { openExpoDb } from '@/db/expoSqlDb';
 import { createLibraryRepo } from '@/db/libraryRepo';
 import { migrate } from '@/db/migrations';
 import { openMigrated } from '@/db/openDatabase';
@@ -15,6 +12,7 @@ import { languageFromLocale } from '@/i18n';
 import { createHistoryStore, type HistoryState } from './historyStore';
 import { createLibraryStore, type LibraryState } from './libraryStore';
 import { createSessionStore, type SessionState } from './sessionStore';
+import { deletePlatformDb, kv, openPlatformDb } from './platform';
 import { createSettingsStore, type Language, type SettingsState } from './settingsStore';
 
 function buildStores(db: SqlDb, defaultLanguage: Language) {
@@ -33,13 +31,12 @@ function buildStores(db: SqlDb, defaultLanguage: Language) {
     discardActiveSession: () => session.getState().abandon(),
   });
   const history = createHistoryStore(attemptRepo);
-  const settings = createSettingsStore(KvStorage, defaultLanguage);
+  const settings = createSettingsStore(kv, defaultLanguage);
   return { db, library, session, history, settings };
 }
 
 export type Stores = ReturnType<typeof buildStores>;
 
-const DB_NAME = 'quizkit.db';
 let stores: Stores | null = null;
 
 export function deviceLanguage(): Language {
@@ -49,7 +46,7 @@ export function deviceLanguage(): Language {
 /** Opens the database, runs migrations and hydrates every store. Call once from the root layout. */
 export async function initStores(): Promise<Stores> {
   if (stores) return stores;
-  const db = await openMigrated(() => openExpoDb(DB_NAME), migrate);
+  const db = await openMigrated(openPlatformDb, migrate);
   const s = buildStores(db, deviceLanguage());
   await Promise.all([s.settings.getState().hydrate(), s.library.getState().hydrate(), s.session.getState().hydrate()]);
   stores = s;
@@ -74,7 +71,7 @@ export async function deleteAllData(): Promise<void> {
 export async function resetDatabaseFile(): Promise<void> {
   if (stores) await stores.db.close().catch(() => undefined);
   stores = null;
-  await deleteDatabaseAsync(DB_NAME);
+  await deletePlatformDb();
 }
 
 export function getStores(): Stores {

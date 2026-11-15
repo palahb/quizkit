@@ -22,7 +22,8 @@
       "package": "com.palahb.quizkit"
     },
     "web": {
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/favicon.png",
+      "output": "single"
     },
     "plugins": [
       "expo-router",
@@ -39,7 +40,8 @@
     ],
     "experiments": {
       "typedRoutes": true,
-      "reactCompiler": true
+      "reactCompiler": true,
+      "baseUrl": "/quizkit"
     }
   }
 }
