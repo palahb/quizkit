@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, ScrollView, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, View } from 'react-native';
+import { showAlert } from '@/components/alert';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Icon } from '@/components/Icon';
@@ -36,7 +37,7 @@ export default function SessionScreen() {
   useEffect(() => {
     store.resume().then((ok) => {
       if (!ok) {
-        Alert.alert('', t('session.cannotResume'));
+        showAlert('', t('session.cannotResume'));
         router.back();
       }
     }, showError);

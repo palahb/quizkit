@@ -1,6 +1,7 @@
 import { DarkTheme, DefaultTheme, router, Stack, ThemeProvider } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
+import { showAlert } from '@/components/alert';
 
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { Button, Screen, T } from '@/components/ui';
@@ -45,7 +46,7 @@ function LoadError({ onRetry }: { onRetry: () => void }) {
   const lang = deviceLanguage();
   const tr = (k: string) => translate(lang, k);
   const reset = () =>
-    Alert.alert(tr('app.resetData'), tr('app.resetConfirm'), [
+    showAlert(tr('app.resetData'), tr('app.resetConfirm'), [
       { text: tr('common.cancel'), style: 'cancel' },
       {
         text: tr('app.resetData'),
@@ -54,7 +55,7 @@ function LoadError({ onRetry }: { onRetry: () => void }) {
           try {
             await resetDatabaseFile();
           } catch (e) {
-            Alert.alert(tr('app.loadError'), e instanceof Error ? e.message : String(e));
+            showAlert(tr('app.loadError'), e instanceof Error ? e.message : String(e));
             return;
           }
           onRetry();

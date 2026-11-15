@@ -1,4 +1,4 @@
-import { Alert } from 'react-native';
+import { showAlert } from '@/components/alert';
 
 import { Button, Card, Segmented, Screen, T } from '@/components/ui';
 import { useT } from '@/hooks/useT';
@@ -13,7 +13,7 @@ export default function SettingsScreen() {
   const setTheme = useSettingsStore((s) => s.setTheme);
 
   const confirmDeleteAll = () =>
-    Alert.alert(t('settings.deleteAll'), t('settings.deleteAllConfirm'), [
+    showAlert(t('settings.deleteAll'), t('settings.deleteAllConfirm'), [
       { text: t('common.cancel'), style: 'cancel' },
       { text: t('common.delete'), style: 'destructive', onPress: () => void deleteAllData() },
     ]);

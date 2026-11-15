@@ -3,7 +3,8 @@ import * as DocumentPicker from 'expo-document-picker';
 import { File } from 'expo-file-system';
 import { router, useLocalSearchParams } from 'expo-router';
 import { type ComponentRef, useEffect, useMemo, useRef, useState } from 'react';
-import { Alert, Keyboard, type ScrollView } from 'react-native';
+import { Keyboard, type ScrollView } from 'react-native';
+import { showAlert } from '@/components/alert';
 
 import { FolderPicker } from '@/components/FolderPicker';
 import { Screen } from '@/components/ui';
@@ -77,7 +78,7 @@ export default function ImportScreen() {
   const paste = async () => {
     const clip = await Clipboard.getStringAsync();
     if (!clip.trim()) {
-      Alert.alert('', t('import.clipboardEmpty'));
+      showAlert('', t('import.clipboardEmpty'));
       return;
     }
     load(clip);
@@ -89,8 +90,8 @@ export default function ImportScreen() {
       (uri) => new File(uri).text(),
     );
     if (r.kind === 'ok') load(r.text);
-    else if (r.kind === 'too-large') Alert.alert('', t('import.fileTooLarge'));
-    else if (r.kind === 'error') Alert.alert('', t('import.fileReadError'));
+    else if (r.kind === 'too-large') showAlert('', t('import.fileTooLarge'));
+    else if (r.kind === 'error') showAlert('', t('import.fileReadError'));
   };
 
   const saveCollection = async () => {
@@ -99,7 +100,7 @@ export default function ImportScreen() {
     const skipped = plan.counts.duplicates + plan.counts.invalid;
     const lines = [t('import.collection.saved', { quizzes: importedQuizzes, folders: createdFolders })];
     if (skipped > 0) lines.push(t('import.collection.skipped', { n: skipped }));
-    Alert.alert(t('import.collection.savedTitle'), lines.join('\n'));
+    showAlert(t('import.collection.savedTitle'), lines.join('\n'));
     router.back();
   };
 

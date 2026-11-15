@@ -1,10 +1,10 @@
-import { Alert } from 'react-native';
+import { showAlert } from '@/components/alert';
 
 import type { TFunction } from '@/i18n';
 
 export function confirmAsync(title: string, message: string, confirmLabel: string, t: TFunction, destructive = true): Promise<boolean> {
   return new Promise((resolve) =>
-    Alert.alert(title, message, [
+    showAlert(title, message, [
       { text: t('common.cancel'), style: 'cancel', onPress: () => resolve(false) },
       { text: confirmLabel, style: destructive ? 'destructive' : 'default', onPress: () => resolve(true) },
     ], { cancelable: true, onDismiss: () => resolve(false) }),
@@ -12,7 +12,7 @@ export function confirmAsync(title: string, message: string, confirmLabel: strin
 }
 
 export function showError(e: unknown) {
-  Alert.alert('', e instanceof Error ? e.message : String(e));
+  showAlert('', e instanceof Error ? e.message : String(e));
 }
 
 /**
