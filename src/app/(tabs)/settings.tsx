@@ -53,6 +53,7 @@ export default function SettingsScreen() {
       {Platform.OS === 'web' ? <InstallHint /> : null}
       {Platform.OS === 'web' ? <BackupSection /> : null}
       <T variant="small">{t('settings.about')}</T>
+      {Platform.OS === 'web' ? <T variant="small">{`Quizkit web · ${(process.env.EXPO_PUBLIC_BUILD_ID ?? 'dev').slice(0, 7)}`}</T> : null}
     </Screen>
   );
 }
