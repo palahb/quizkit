@@ -8,6 +8,7 @@ import { initStores } from '@/stores';
 import { useT } from '@/hooks/useT';
 import { useTheme } from '@/theme/useTheme';
 import { persistStorage } from '@/web/persistStorage';
+import { registerServiceWorker } from '@/web/registerServiceWorker';
 
 function AppStack() {
   const theme = useTheme();
@@ -58,7 +59,10 @@ export default function RootLayout() {
   useEffect(load, [load]);
 
   useEffect(() => {
-    if (Platform.OS === 'web') void persistStorage();
+    if (Platform.OS === 'web') {
+      void persistStorage();
+      registerServiceWorker();
+    }
   }, []);
 
   if (status === 'loading') {

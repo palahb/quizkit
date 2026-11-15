@@ -65,7 +65,9 @@
     "build:katex": "tsx scripts/build-katex-assets.ts",
     "build:icons": "tsx scripts/build-icons.ts",
     "build:docs": "tsx scripts/build-docs.ts",
-    "build:wasm": "mkdir -p public && cp node_modules/sql.js/dist/sql-wasm.wasm node_modules/sql.js/dist/sql-wasm-browser.wasm public/"
+    "build:wasm": "mkdir -p public && cp node_modules/sql.js/dist/sql-wasm.wasm node_modules/sql.js/dist/sql-wasm-browser.wasm public/",
+    "build:sw": "tsx scripts/build-sw.ts",
+    "build:web": "npm run build:wasm && expo export -p web && npm run build:sw"
   },
   "private": true,
   "license": "MIT"
