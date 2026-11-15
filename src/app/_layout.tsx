@@ -1,13 +1,10 @@
 import { DarkTheme, DefaultTheme, router, Stack, ThemeProvider } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Platform, View } from 'react-native';
-import { showAlert } from '@/components/alert';
 
 import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { Button, Screen, T } from '@/components/ui';
-import { loadErrorKey } from '@/db/loadErrorKey';
-import { translate } from '@/i18n';
-import { deviceLanguage, initStores, resetDatabaseFile } from '@/stores';
+import { LoadError } from '@/components/LoadError';
+import { initStores } from '@/stores';
 import { useT } from '@/hooks/useT';
 import { useTheme } from '@/theme/useTheme';
 import { persistStorage } from '@/web/persistStorage';
@@ -40,36 +37,6 @@ function AppStack() {
         </Stack>
       </ErrorBoundary>
     </ThemeProvider>
-  );
-}
-
-/** Shown when the database cannot be opened. Uses the device language because settings are unavailable. */
-function LoadError({ onRetry, error }: { onRetry: () => void; error: unknown }) {
-  const lang = deviceLanguage();
-  const tr = (k: string) => translate(lang, k);
-  const reset = () =>
-    showAlert(tr('app.resetData'), tr('app.resetConfirm'), [
-      { text: tr('common.cancel'), style: 'cancel' },
-      {
-        text: tr('app.resetData'),
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await resetDatabaseFile();
-          } catch (e) {
-            showAlert(tr('app.loadError'), e instanceof Error ? e.message : String(e));
-            return;
-          }
-          onRetry();
-        },
-      },
-    ]);
-  return (
-    <Screen edges={['top', 'left', 'right', 'bottom']}>
-      <T variant="heading">{tr(loadErrorKey(error))}</T>
-      <Button label={tr('app.retry')} onPress={onRetry} />
-      <Button label={tr('app.resetData')} kind="danger" onPress={reset} />
-    </Screen>
   );
 }
 

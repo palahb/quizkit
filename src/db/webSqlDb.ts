@@ -1,14 +1,10 @@
 import initSqlJs, { type Database } from 'sql.js';
 
+import { DatabaseLockedError } from './errors';
 import type { SqlDb } from './sqlDb';
 import type { SnapshotStore } from './webSnapshotStore';
 
-export class DatabaseLockedError extends Error {
-  constructor(name: string) {
-    super(`Database "${name}" is open in another tab or window`);
-    this.name = 'DatabaseLockedError';
-  }
-}
+export { DatabaseLockedError };
 
 export interface WebLock {
   acquire(name: string): Promise<boolean>;
