@@ -1,6 +1,7 @@
 import { DarkTheme, DefaultTheme, router, Stack, ThemeProvider } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { ActivityIndicator, Platform, View } from 'react-native';
+import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { LoadError } from '@/components/LoadError';
@@ -8,8 +9,16 @@ import { initStores } from '@/stores';
 import { useT } from '@/hooks/useT';
 import { useTheme } from '@/theme/useTheme';
 import { persistStorage } from '@/web/persistStorage';
-import { applyStandalonePadding } from '@/web/standalonePadding';
+import { applyStandalonePadding, paddingApplied } from '@/web/standalonePadding';
 import { registerServiceWorker } from '@/web/registerServiceWorker';
+
+// The installed iPhone app pads the page itself (src/web/standalonePadding.ts), so everything below
+// must see zero insets or it would be padded twice. Elsewhere the library's own insets stay.
+const NO_INSETS = { top: 0, bottom: 0, left: 0, right: 0 };
+
+function ZeroInsetsIfPadded({ children }: { children: ReactNode }) {
+  return paddingApplied ? <SafeAreaInsetsContext.Provider value={NO_INSETS}>{children}</SafeAreaInsetsContext.Provider> : <>{children}</>;
+}
 
 function AppStack() {
   const theme = useTheme();
@@ -35,6 +44,7 @@ function AppStack() {
           router.replace('/');
         }}
       >
+        <ZeroInsetsIfPadded>
         <Stack screenOptions={{ headerBackTitle: t('common.back') }}>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="import" options={{ presentation: 'modal', title: t('import.title') }} />
@@ -44,6 +54,7 @@ function AppStack() {
           <Stack.Screen name="results/[attemptId]" options={{ title: t('results.title'), headerBackVisible: false, gestureEnabled: false }} />
           <Stack.Screen name="review/[attemptId]" options={{ title: t('review.title') }} />
         </Stack>
+        </ZeroInsetsIfPadded>
       </ErrorBoundary>
     </ThemeProvider>
   );
