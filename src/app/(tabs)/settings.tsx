@@ -5,6 +5,7 @@ import { Button, Card, Segmented, Screen, T } from '@/components/ui';
 import { BackupSection } from '@/features/settings/BackupSection';
 import { InstallHint } from '@/features/settings/InstallHint';
 import { useT } from '@/hooks/useT';
+import { lastPaddingDebug } from '@/web/standalonePadding';
 import { deleteAllData, useSettingsStore } from '@/stores';
 import type { Language, ThemeSetting } from '@/stores/settingsStore';
 
@@ -53,7 +54,7 @@ export default function SettingsScreen() {
       {Platform.OS === 'web' ? <InstallHint /> : null}
       {Platform.OS === 'web' ? <BackupSection /> : null}
       <T variant="small">{t('settings.about')}</T>
-      {Platform.OS === 'web' ? <T variant="small">{`Quizkit web · ${(process.env.EXPO_PUBLIC_BUILD_ID ?? 'dev').slice(0, 7)}`}</T> : null}
+      {Platform.OS === 'web' ? <T variant="small">{`Quizkit web · ${(process.env.EXPO_PUBLIC_BUILD_ID ?? 'dev').slice(0, 7)}\n${lastPaddingDebug}`}</T> : null}
     </Screen>
   );
 }

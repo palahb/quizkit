@@ -22,6 +22,9 @@ export function computeStandalonePadding(i: PaddingInput): { top: number; bottom
   return { top, bottom: BOTTOM };
 }
 
+/** What the last measurement saw and decided; shown in Settings to diagnose layout problems. */
+export let lastPaddingDebug = 'not measured';
+
 /** Measures the browser and publishes the result as CSS variables read by public/index.html. */
 export function applyStandalonePadding(): void {
   if (typeof document === 'undefined' || typeof window === 'undefined') return;
@@ -42,6 +45,7 @@ export function applyStandalonePadding(): void {
     screenHeight: window.screen.height,
     innerHeight: window.innerHeight,
   });
+  lastPaddingDebug = `standalone=${standalone} envTop=${envTop} envBottom=${envBottom} screenH=${window.screen.height} innerH=${window.innerHeight} -> top=${top} bottom=${bottom}`;
   document.documentElement.style.setProperty('--qk-top', `${top}px`);
   document.documentElement.style.setProperty('--qk-bottom', `${bottom}px`);
 }
