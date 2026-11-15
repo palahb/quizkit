@@ -60,6 +60,8 @@ En basit test şöyle görünür:
 2. **Paylaş**'a, sonra **Ana Ekrana Ekle**'ye dokun.
 3. Quizkit'i yeni simgeden aç.
 
+Önce yükle, sonra içe aktar: iPhone'da yüklenen uygulamanın depolaması ayrıdır, Safari sekmesinde eklediğin testler oraya geçmez. Taşımak için Safari'de **Ayarlar → Yedekle**'yi, yüklenen uygulamada **Geri yükle**'yi kullan.
+
 İlk yüklemeden sonra çevrimdışı çalışır, hesap gerekmez. Güncellemeler, uygulamayı bir sonraki açışında internetteyken kendiliğinden gelir.
 
 Testlerin yalnızca cihazında durur ve tarayıcılar saklanan verinin sonsuza dek korunacağını garanti etmez. Arada bir **Ayarlar → Yedekle**'yi kullan ve dosyayı güvenli bir yerde sakla.

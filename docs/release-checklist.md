@@ -42,13 +42,14 @@ Allowed hit in the network grep: `src/features/import/readFile.web.ts` calls `fe
 - [ ] Import a quiz with math; solve in Practice and Exam; kill the app and reopen: data and unfinished quiz are still there.
 - [ ] Airplane mode, launch from the icon: everything works.
 - [ ] Settings, Back up: file saved; Delete all data; Restore: library returns.
-- [ ] Open the site in a Safari tab while the home-screen app is open: the tab shows the "already open in another window" message.
+- [ ] The Safari tab copy and the installed app have separate libraries (a quiz imported in the Safari tab does not appear in the installed app, and vice versa).
+- [ ] Back up in the Safari tab, then Restore that file in the installed app: the library moves over.
 - [ ] After a later deploy: open the app twice, the new version appears; data intact.
 - [ ] Wait a week unused, reopen: data still there (home-screen apps are exempt from Safari's 7-day cleanup; this confirms it on the owner's phone).
 - [ ] After force-quitting the home-screen app and reopening, the unfinished quiz card still resumes.
 - [ ] The "Add to Home Screen" hint in Settings disappears when launched from the home-screen icon.
 - [ ] Importing a `.json` file via the web file picker works, and pasting from the clipboard works (iOS asks permission).
-- [ ] Opening the site in Safari while the home-screen app is open shows the "already open in another window" screen without a Reset button.
+- [ ] On a desktop browser, a second tab of the site shows the "already open in another window" screen without a Reset button.
 
 ## Android (only if publishing to Google Play)
 

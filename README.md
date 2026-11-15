@@ -60,6 +60,8 @@ Open **https://palahb.github.io/quizkit/** and install it like an app:
 2. Tap **Share**, then **Add to Home Screen**.
 3. Open Quizkit from the new icon.
 
+Install first, then import: on iPhone the installed app has its own separate storage, so quizzes added in a Safari tab don't carry over. To move them, use **Settings → Back up** in Safari and **Restore** in the installed app.
+
 After the first load it works offline, with no account. Updates arrive automatically the next time you open the app while online.
 
 Your quizzes live only on the device, and browsers don't guarantee that stored data is kept forever. Use **Settings → Back up** every so often and keep the file somewhere safe.
