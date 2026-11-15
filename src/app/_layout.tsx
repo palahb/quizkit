@@ -8,6 +8,7 @@ import { initStores } from '@/stores';
 import { useT } from '@/hooks/useT';
 import { useTheme } from '@/theme/useTheme';
 import { persistStorage } from '@/web/persistStorage';
+import { applyStandalonePadding } from '@/web/standalonePadding';
 import { registerServiceWorker } from '@/web/registerServiceWorker';
 
 function AppStack() {
@@ -69,6 +70,7 @@ export default function RootLayout() {
     if (Platform.OS === 'web') {
       void persistStorage();
       registerServiceWorker();
+      applyStandalonePadding();
     }
   }, []);
 

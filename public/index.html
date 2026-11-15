@@ -41,6 +41,14 @@
         bottom: 0;
         left: 0;
         display: flex;
+        box-sizing: border-box;
+        /* Set by src/web/standalonePadding.ts in the installed iPhone app, 0 elsewhere. */
+        padding-top: var(--qk-top, 0px);
+        padding-bottom: var(--qk-bottom, 0px);
+      }
+      /* The stack navigator shrinks <body> to window.innerHeight, which is too short in the installed app. */
+      html body {
+        height: 100% !important;
       }
     </style>
   </head>
