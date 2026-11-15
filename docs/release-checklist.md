@@ -10,7 +10,13 @@ Run this on a real iPhone before each release. Tick each line and note the date.
 | Type check | `npx tsc --noEmit` | 2026-10-27: clean |
 | iOS bundle builds | `npx expo export --platform ios` | 2026-10-27: ok |
 | Dependency health | `npx expo-doctor` | 2026-10-27: 20/20 |
-| No network code in the app | `grep -rnE 'fetch\(\|XMLHttpRequest\|https?://\|WebSocket\|openURL' src \| grep -v __tests__ \| grep -v katexCss.generated` prints nothing | 2026-10-27: nothing found |
+| No network code in the app | `grep -rnE 'fetch\(\|XMLHttpRequest\|https?://\|WebSocket\|openURL' src \| grep -v __tests__ \| grep -v katexCss.generated` prints only the allowed hit below | 2026-10-27: nothing found; 2026-11-15: only the allowed hit |
+| No remote URLs in the app | `grep -rnE 'https?://' src \| grep -v __tests__ \| grep -v katexCss.generated` prints nothing | 2026-11-15: nothing found |
+| Web bundle builds | `npm run build:web` | 2026-11-15: ok (exports dist/, writes sw.js with 47 precached urls and 404.html) |
+| Unit and component tests (web work) | `npx jest` | 2026-11-15: 373/373 pass (44 suites) |
+| Type check (web work) | `npx tsc --noEmit` | 2026-11-15: clean |
+
+Allowed hit in the network grep: `src/features/import/readFile.web.ts` calls `fetch(asset.uri)` to read a file the user picked (a local blob URL). It must never be given a remote URL. Any other hit, or any `http(s)://` string in `src`, is a failure: the app makes no remote network access at runtime. (`scripts/` and the generated `sw.js` are outside `src/`; the service worker only serves precached same-origin files.)
 
 ## On the iPhone (airplane mode ON for everything below)
 
@@ -29,6 +35,20 @@ Run this on a real iPhone before each release. Tick each line and note the date.
 - [ ] Dark mode (Settings → Appearance → Dark): every screen readable, math readable.
 - [ ] Text size: iOS Settings → Display & Brightness → Text Size at largest; nothing clipped, math grows too.
 - [ ] Delete all data (Settings) empties the library and history.
+
+## Web / PWA (iPhone, installed from Safari)
+
+- [ ] Open the Pages URL in Safari, Share, Add to Home Screen, launch from the icon (full screen, no Safari bars).
+- [ ] Import a quiz with math; solve in Practice and Exam; kill the app and reopen: data and unfinished quiz are still there.
+- [ ] Airplane mode, launch from the icon: everything works.
+- [ ] Settings, Back up: file saved; Delete all data; Restore: library returns.
+- [ ] Open the site in a Safari tab while the home-screen app is open: the tab shows the "already open in another window" message.
+- [ ] After a later deploy: open the app twice, the new version appears; data intact.
+- [ ] Wait a week unused, reopen: data still there (home-screen apps are exempt from Safari's 7-day cleanup; this confirms it on the owner's phone).
+- [ ] After force-quitting the home-screen app and reopening, the unfinished quiz card still resumes.
+- [ ] The "Add to Home Screen" hint in Settings disappears when launched from the home-screen icon.
+- [ ] Importing a `.json` file via the web file picker works, and pasting from the clipboard works (iOS asks permission).
+- [ ] Opening the site in Safari while the home-screen app is open shows the "already open in another window" screen without a Reset button.
 
 ## Android (only if publishing to Google Play)
 
