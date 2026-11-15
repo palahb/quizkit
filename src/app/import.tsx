@@ -1,6 +1,5 @@
 import * as Clipboard from 'expo-clipboard';
 import * as DocumentPicker from 'expo-document-picker';
-import { File } from 'expo-file-system';
 import { router, useLocalSearchParams } from 'expo-router';
 import { type ComponentRef, useEffect, useMemo, useRef, useState } from 'react';
 import { Keyboard, type ScrollView } from 'react-native';
@@ -14,6 +13,7 @@ import { getPrompt } from '@/domain/prompts';
 import type { Id } from '@/domain/types';
 import { isBulkChange, useAutoCheck } from '@/features/import/autoCheck';
 import { readPickedFile, saveImport } from '@/features/import/importActions';
+import { readTextFile } from '@/features/import/readFile';
 import { ImportPanel } from '@/features/import/ImportPanel';
 import { confirmAsync, showError } from '@/features/library/flows';
 import { copyPrompt as copyPromptToClipboard } from '@/features/prompts/copyPrompt';
@@ -76,7 +76,12 @@ export default function ImportScreen() {
   };
 
   const paste = async () => {
-    const clip = await Clipboard.getStringAsync();
+    let clip = '';
+    try {
+      clip = await Clipboard.getStringAsync();
+    } catch {
+      // Clipboard permission denied (web): treat as empty.
+    }
     if (!clip.trim()) {
       showAlert('', t('import.clipboardEmpty'));
       return;
@@ -87,7 +92,7 @@ export default function ImportScreen() {
   const pickFile = async () => {
     const r = await readPickedFile(
       () => DocumentPicker.getDocumentAsync({ type: '*/*', copyToCacheDirectory: true }),
-      (uri) => new File(uri).text(),
+      (_uri, asset) => readTextFile(asset),
     );
     if (r.kind === 'ok') load(r.text);
     else if (r.kind === 'too-large') showAlert('', t('import.fileTooLarge'));

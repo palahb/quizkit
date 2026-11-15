@@ -4,13 +4,13 @@ import type { Id, ParsedQuiz, QuizSummary } from '@/domain/types';
 /** The parts of expo-document-picker's result this flow needs. */
 export interface PickResult {
   canceled: boolean;
-  assets: { uri: string; size?: number }[] | null;
+  assets: { uri: string; size?: number; file?: File }[] | null;
 }
 
 export type ReadResult = { kind: 'cancelled' } | { kind: 'too-large' } | { kind: 'error' } | { kind: 'ok'; text: string };
 
 /** Picks a file and reads it as text, refusing files over 10 MB before reading them. */
-export async function readPickedFile(pick: () => Promise<PickResult>, read: (uri: string) => Promise<string>): Promise<ReadResult> {
+export async function readPickedFile(pick: () => Promise<PickResult>, read: (uri: string, asset: { uri: string; file?: File }) => Promise<string>): Promise<ReadResult> {
   let picked: PickResult;
   try {
     picked = await pick();
@@ -21,7 +21,7 @@ export async function readPickedFile(pick: () => Promise<PickResult>, read: (uri
   if (picked.canceled || !asset) return { kind: 'cancelled' };
   if (asset.size !== undefined && asset.size > MAX_INPUT_BYTES) return { kind: 'too-large' };
   try {
-    return { kind: 'ok', text: await read(asset.uri) };
+    return { kind: 'ok', text: await read(asset.uri, asset) };
   } catch {
     return { kind: 'error' };
   }
